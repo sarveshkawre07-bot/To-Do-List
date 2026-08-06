@@ -7,7 +7,13 @@ import {
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-const user = JSON.parse(localStorage.getItem("user"));
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // User is logged in
+    } else {
+        // Redirect to login
+    }
+});
 
 if (user) {
 

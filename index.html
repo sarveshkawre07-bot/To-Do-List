@@ -9,27 +9,9 @@
 
 <h1>Dashboard</h1>
 
-<script>
+<button id="logoutBtn">Logout</button>
 
-const user = JSON.parse(localStorage.getItem("user"));
-
-console.log(user);
-
-if(user){
-
-    document.body.innerHTML += `
-        <h2>Welcome ${user.name}</h2>
-        <img src="${user.photo}" width="100">
-        <p>${user.email}</p>
-    `;
-
-}else{
-
-    document.body.innerHTML += "<h2>No user found!</h2>";
-
-}
-
-</script>
+<script type="module" src="dashboard.js"></script>
 
 </body>
 </html>
