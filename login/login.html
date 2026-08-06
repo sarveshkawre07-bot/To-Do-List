@@ -5,19 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | To-Do App</title>
     <link rel="stylesheet" href="login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="login-container">
-    <h1>Welcome</h1>
-    <p>Sign in to continue</p>
+<div class="container">
 
-    <button id="googleLogin">
-        Continue with Google
-    </button>
+    <!-- Left Side -->
+    <section class="left-panel">
+
+        <img
+            src="../assets/images/login-illustration.svg"
+            alt="Login Illustration"
+            class="illustration">
+
+    </section>
+
+    <!-- Right Side -->
+    <section class="right-panel">
+
+        <div class="login-card">
+
+            <h1>Welcome!</h1>
+
+            <p>
+                Sign in to continue to
+                <strong>To-do-Flow</strong>
+            </p>
+
+            <button id="googleLogin">
+
+                <img
+                    src="../assets/images/google-logo.svg"
+                    alt="Google">
+
+                <span>Continue with Google</span>
+
+            </button>
+
+        </div>
+
+    </section>
+
 </div>
 
 <script type="module" src="login.js"></script>
 
 </body>
-</html>
