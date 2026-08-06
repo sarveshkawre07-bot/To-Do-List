@@ -8,6 +8,8 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCsKtWW-RXBW14q1QSffFmUmkeH83uktxE",

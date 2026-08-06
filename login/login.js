@@ -7,20 +7,6 @@ import {
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // User is logged in
-    } else {
-        // Redirect to login
-    }
-});
-
-if (user) {
-
-    window.location.href = "../index.html";
-
-}
-
 const loginButton = document.getElementById("googleLogin");
 
 loginButton.addEventListener("click", signIn);
