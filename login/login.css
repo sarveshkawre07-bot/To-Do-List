@@ -28,6 +28,10 @@ body{
 
 /* ---------- LEFT PANEL ---------- */
 
+/* ==========================================
+   LEFT PANEL
+========================================== */
+
 .left-panel{
 
     width:50%;
@@ -36,9 +40,13 @@ body{
 
     display:flex;
 
+    flex-direction:column;
+
     justify-content:center;
 
     align-items:center;
+
+    padding:50px;
 
 }
 
@@ -113,11 +121,31 @@ body{
 
     width:70%;
 
-    max-width:450px;
+    max-width:430px;
 
-    height:auto;
+    animation:float 5s ease-in-out infinite;
 
-    object-fit:contain;
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-15px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
 
 }
 
@@ -129,7 +157,7 @@ body{
 
     z-index:5;
 
-    width:430px;
+    width:min(430px,90%);
 
     background:#fff;
 
@@ -174,15 +202,11 @@ body{
 
     border:none;
 
-    border-radius:50px;
+    border-radius:14px;
 
-    background:#1976d2;
+    background:#2563EB;
 
     color:white;
-
-    font-size:17px;
-
-    font-weight:600;
 
     display:flex;
 
@@ -193,6 +217,12 @@ body{
     gap:15px;
 
     cursor:pointer;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:all .3s ease;
 
 }
 
@@ -218,11 +248,268 @@ body{
 
 #googleLogin:hover{
 
+    background:#1D4ED8;
+
     transform:translateY(-3px);
 
-    box-shadow:0 12px 25px rgba(37,99,235,.35);
+    box-shadow:
 
-    background:#1565C0;
+    0 15px 35px rgba(37,99,235,.35);
 
 }
 
+#googleLogin:active{
+
+    transform:scale(.98);
+
+}
+
+/* =======================================
+   TABLET
+======================================= */
+
+@media (max-width:1024px){
+
+    .login-card{
+
+        width:360px;
+
+        padding:45px 35px;
+
+    }
+
+    .illustration{
+
+        width:85%;
+
+    }
+
+    .login-card h1{
+
+        font-size:34px;
+
+    }
+
+}
+
+/* =======================================
+   MOBILE
+======================================= */
+
+@media (max-width:768px){
+
+    .container{
+
+        flex-direction:column;
+
+    }
+
+    .left-panel,
+    .right-panel{
+
+        width:100%;
+
+    }
+
+    .left-panel{
+
+        height:40vh;
+
+        padding:30px;
+
+    }
+
+    .right-panel{
+
+        height:60vh;
+
+    }
+
+    .illustration{
+
+        width:260px;
+
+    }
+
+    .login-card{
+
+        width:90%;
+
+        max-width:380px;
+
+    }
+
+}
+
+/* =======================================
+   SMALL PHONES
+======================================= */
+
+@media (max-width:480px){
+
+    .login-card{
+
+        padding:35px 25px;
+
+    }
+
+    .login-card h1{
+
+        font-size:30px;
+
+    }
+
+    .login-card p{
+
+        font-size:14px;
+
+        line-height:24px;
+
+    }
+
+    #googleLogin{
+
+    width:100%;
+
+    height:58px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#2563EB;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s ease;
+
+}
+
+    .illustration{
+
+        width:200px;
+
+    }
+
+}
+
+/* ======================================
+   PAGE ANIMATION
+====================================== */
+
+.login-card{
+
+    animation:fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+        transform:translateY(30px);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:translateY(0);
+
+    }
+
+}
+
+.login-card{
+
+    transition:.4s;
+
+}
+
+.login-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+::selection{
+
+    background:#2563EB;
+
+    color:white;
+
+}
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#2563EB;
+
+    border-radius:20px;
+
+}
+
+.loading{
+
+    opacity:.7;
+
+    pointer-events:none;
+
+}
+
+.hero-content{
+
+    text-align:center;
+
+    margin-bottom:40px;
+
+}
+
+.hero-content h1{
+
+    font-size:52px;
+
+    font-weight:700;
+
+    color:#1E293B;
+
+    margin-bottom:18px;
+
+}
+
+.tagline{
+
+    width:420px;
+
+    font-size:20px;
+
+    line-height:34px;
+
+    color:#64748B;
+
+}
+
+.hero-content span{
+
+    color:#2563EB;
+
+}
