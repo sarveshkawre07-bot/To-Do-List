@@ -176,6 +176,56 @@ const taskForm =
 const taskList =
     document.getElementById("taskList");
 
+// ======================================
+// Subtasks
+// ======================================
+
+let subtasks = [];
+
+const addSubtaskButton =
+    document.getElementById("addSubtaskBtn");
+
+const subtaskContainer =
+    document.getElementById("subtaskInputContainer");
+
+
+addSubtaskButton.addEventListener("click", () => {
+
+    const input =
+        subtaskContainer.querySelector(
+            ".subtask-title"
+        );
+
+    const title =
+        input.value.trim();
+
+
+    if (!title) {
+        return;
+    }
+
+
+    subtasks.push({
+
+        id: Date.now(),
+
+        title: title,
+
+        completed: false
+
+    });
+
+
+    console.log(
+        "Subtasks:",
+        subtasks
+    );
+
+
+    input.value = "";
+
+});
+
 
 taskForm.addEventListener("submit", (event) => {
 
@@ -235,6 +285,8 @@ taskForm.addEventListener("submit", (event) => {
 
         repeat: repeat,
 
+        subtasks: subtasks,
+
         createdAt: new Date()
 
     };
@@ -258,6 +310,8 @@ taskForm.addEventListener("submit", (event) => {
     // Reset form
 
     taskForm.reset();
+
+    subtasks = [];
 
 });
 
