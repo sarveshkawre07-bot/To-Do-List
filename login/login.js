@@ -32,7 +32,7 @@ async function signIn() {
         
         console.log(user);
         
-        window.location.href = "../index.html";
+        window.location.href = "../dashboard/index.html";
 
     } catch (error) {
 

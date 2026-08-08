@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>To-Do Flow</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <span class="logo-icon">✓</span>
+                <span>To-Do Flow</span>
+            </div>
+
+
+            <nav class="navigation">
+
+                <p class="nav-title">MAIN</p>
+
+                <a href="#" class="nav-item active">
+                    <span>🏠</span>
+                    <span>Today</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>📋</span>
+                    <span>All Tasks</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>⭐</span>
+                    <span>Important</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>📅</span>
+                    <span>Calendar</span>
+                </a>
+
+
+                <p class="nav-title">PRODUCTIVITY</p>
+
+                <a href="#" class="nav-item">
+                    <span>🎯</span>
+                    <span>Goals</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>📊</span>
+                    <span>Progress</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>🍅</span>
+                    <span>Focus</span>
+                </a>
+
+
+                <p class="nav-title">ORGANIZATION</p>
+
+                <a href="#" class="nav-item">
+                    <span>📁</span>
+                    <span>Categories</span>
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <a href="#" class="nav-item">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </a>
+
+                <button id="logoutBtn" class="logout-btn">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ================= MAIN CONTENT ================= -->
+
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+
+            <header class="top-bar">
+
+                <div>
+                    <h1>Today</h1>
+                    <p id="currentDate">Saturday, August 8</p>
+                </div>
+
+
+                <div class="top-actions">
+
+                    <div class="stat-card">
+                        <span>🔥</span>
+
+                        <div>
+                            <small>Streak</small>
+                            <strong>7 days</strong>
+                        </div>
+                    </div>
+
+
+                    <div class="stat-card">
+                        <span>⭐</span>
+
+                        <div>
+                            <small>Points</small>
+                            <strong>1,250</strong>
+                        </div>
+                    </div>
+
+
+                    <button class="profile-btn">
+                        <img
+                        id="profileImage"
+                        class="profile-avatar"
+                        src=""
+                        alt="Profile"
+                        >
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- GREETING -->
+
+            <section class="greeting">
+
+                <h2>Good morning, <span id="userName">User</span> 👋</h2>
+
+                <p>
+                    You have <strong>5 tasks</strong> planned for today.
+                </p>
+
+            </section>
+
+
+            <!-- SEARCH + ADD TASK -->
+
+            <section class="task-controls">
+
+                <div class="search-box">
+
+                    <span>🔍</span>
+
+                    <input
+                        type="text"
+                        placeholder="Search tasks..."
+                        id="searchInput"
+                    >
+
+                </div>
+
+
+                <button id="addTaskBtn" class="add-task-btn">
+
+                    <span>+</span>
+
+                    Add Task
+
+                </button>
+
+            </section>
+
+
+            <!-- PROGRESS -->
+
+            <section class="progress-section">
+
+                <div class="progress-header">
+
+                    <span>Today's Progress</span>
+
+                    <strong>3 / 5 completed</strong>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div class="progress-fill"></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- TASKS -->
+
+            <section class="tasks-section">
+
+                <div class="section-header">
+
+                    <h2>Today's Tasks</h2>
+
+                    <button class="filter-btn">
+                        Filter ▾
+                    </button>
+
+                </div>
+
+
+                <div id="taskList" class="task-list">
+
+
+                    <!-- TASK 1 -->
+
+                    <article class="task-card">
+
+                        <div class="task-check">
+                            <input type="checkbox">
+                        </div>
+
+
+                        <div class="task-info">
+
+                            <h3>Finish Firebase integration</h3>
+
+                            <p>
+                                Complete authentication and database setup.
+                            </p>
+
+
+                            <div class="task-meta">
+
+                                <span>📁 Project</span>
+
+                                <span>🔴 High</span>
+
+                                <span>⏰ 7:00 PM</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task-actions">
+
+                            <button class="star-btn">
+                                ☆
+                            </button>
+
+                            <button class="more-btn">
+                                ⋮
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- TASK 2 -->
+
+                    <article class="task-card">
+
+                        <div class="task-check">
+                            <input type="checkbox">
+                        </div>
+
+
+                        <div class="task-info">
+
+                            <h3>Study Firebase</h3>
+
+                            <p>
+                                Learn Firestore and security rules.
+                            </p>
+
+
+                            <div class="task-meta">
+
+                                <span>📚 Study</span>
+
+                                <span>🟡 Medium</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task-actions">
+
+                            <button class="star-btn">
+                                ☆
+                            </button>
+
+                            <button class="more-btn">
+                                ⋮
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- TASK 3 -->
+
+                    <article class="task-card completed">
+
+                        <div class="task-check">
+                            <input type="checkbox" checked>
+                        </div>
+
+
+                        <div class="task-info">
+
+                            <h3>Go to gym</h3>
+
+                            <p>
+                                Complete today's workout.
+                            </p>
+
+
+                            <div class="task-meta">
+
+                                <span>🏋️ Fitness</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task-actions">
+
+                            <button class="star-btn">
+                                ☆
+                            </button>
+
+                            <button class="more-btn">
+                                ⋮
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script type="module" src="dashboard.js"></script>
+
+</body>
+
+</html>
