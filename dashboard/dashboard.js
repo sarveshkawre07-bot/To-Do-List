@@ -213,6 +213,8 @@ taskForm.addEventListener("submit", (event) => {
 
         completed: false,
 
+        starred: false,
+
         createdAt: new Date()
 
     };
@@ -255,8 +257,9 @@ function addTaskToUI(task) {
         <div class="task-check">
 
             <input
-                type="checkbox"
-                class="task-checkbox"
+            type="checkbox"
+            class="task-checkbox"
+            ${task.completed ? "checked" : ""}
             >
 
         </div>
@@ -292,8 +295,8 @@ function addTaskToUI(task) {
         <div class="task-actions">
 
             <button class="star-btn">
-                ☆
-            </button>
+    ${task.starred ? "★" : "☆"}
+</button>
 
             <button class="more-btn">
                 ⋮
@@ -305,6 +308,44 @@ function addTaskToUI(task) {
 
 
     taskList.appendChild(taskCard);
+
+    const checkbox =
+    taskCard.querySelector(".task-checkbox");
+
+
+checkbox.addEventListener("change", () => {
+
+    task.completed = checkbox.checked;
+
+    taskCard.classList.toggle(
+        "completed",
+        task.completed
+    );
+
+    console.log(
+        "Task completed:",
+        task.completed
+    );
+
+});
+
+const starButton =
+    taskCard.querySelector(".star-btn");
+
+
+starButton.addEventListener("click", () => {
+
+    task.starred = !task.starred;
+
+    starButton.textContent =
+        task.starred ? "★" : "☆";
+
+    console.log(
+        "Task starred:",
+        task.starred
+    );
+
+});
 
 }
 
