@@ -8,6 +8,10 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import {
+    getFirestore
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
 
 
 // Your web app's Firebase configuration
@@ -24,6 +28,8 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 
+const db = getFirestore(app);
+
 const provider = new GoogleAuthProvider();
 
 export {
@@ -32,6 +38,8 @@ export {
 
     provider,
 
-    signOut
+    signOut,
+
+    db
 
 };

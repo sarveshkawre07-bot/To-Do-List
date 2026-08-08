@@ -1,7 +1,18 @@
 import {
     auth,
-    signOut
+    signOut,
+    db
 } from "../login/firebase.js";
+
+import {
+    collection,
+    addDoc,
+    serverTimestamp,
+    getDocs,
+    deleteDoc,
+    doc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import {
     onAuthStateChanged
@@ -37,6 +48,8 @@ onAuthStateChanged(auth, (user) => {
                 profileImage.src = user.photoURL;
             }
         }
+         // Load Firestore tasks
+        loadTasks();
 
     } else {
 
@@ -312,7 +325,9 @@ function renderSubtasks() {
 }
 
 
-taskForm.addEventListener("submit", (event) => {
+taskForm.addEventListener(
+    "submit", 
+    async (event) => {
 
     event.preventDefault();
 
@@ -348,8 +363,6 @@ taskForm.addEventListener("submit", (event) => {
 
     const task = {
 
-        id: Date.now(),
-
         title: title,
 
         description: description,
@@ -372,7 +385,7 @@ taskForm.addEventListener("submit", (event) => {
 
         subtasks: subtasks,
 
-        createdAt: new Date()
+        createdAt: serverTimestamp()
 
     };
 
@@ -382,7 +395,38 @@ taskForm.addEventListener("submit", (event) => {
 
     // Display task
 
-    addTaskToUI(task);
+    const user = auth.currentUser;
+
+if (!user) {
+
+    console.error("No authenticated user.");
+
+    return;
+
+}
+
+const tasksCollection =
+    collection(
+        db,
+        "users",
+        user.uid,
+        "tasks"
+    );
+
+const taskRef =
+    await addDoc(
+        tasksCollection,
+        task
+    );
+
+task.id = taskRef.id;
+
+console.log(
+    "Task saved to Firestore:",
+    task
+);
+
+addTaskToUI(task);
 
     updateProgress();
 
@@ -494,43 +538,138 @@ function addTaskToUI(task) {
 
     taskList.appendChild(taskCard);
 
-    const checkbox =
+// Restore completed state visually
+if (task.completed) {
+
+    taskCard.classList.add("completed");
+
+}
+
+const checkbox =
     taskCard.querySelector(".task-checkbox");
 
 
-checkbox.addEventListener("change", () => {
+checkbox.addEventListener("change", async () => {
 
-    task.completed = checkbox.checked;
+    const user = auth.currentUser;
 
-    taskCard.classList.toggle(
-        "completed",
-        task.completed
-    );
+    if (!user) {
 
-    console.log(
-        "Task completed:",
-        task.completed
-    );
+        console.error(
+            "No authenticated user."
+        );
 
-    updateProgress();
+        return;
 
-});
+    }
+
+    const newCompletedState =
+        checkbox.checked;
+
+    try {
+
+        const taskRef = doc(
+            db,
+            "users",
+            user.uid,
+            "tasks",
+            task.id
+        );
+
+        await updateDoc(
+            taskRef,
+            {
+                completed: newCompletedState
+            }
+        );
+
+        task.completed =
+            newCompletedState;
+
+        taskCard.classList.toggle(
+            "completed",
+            task.completed
+        );
+
+        console.log(
+            "Task completion saved:",
+            task.completed
+        );
+
+        updateProgress();
+
+    } catch (error) {
+
+        console.error(
+            "Failed to update task:",
+            error
+        );
+
+        // Revert checkbox if Firestore update fails
+        checkbox.checked =
+            task.completed;
+
+    }
+
+});;
 
 const starButton =
     taskCard.querySelector(".star-btn");
 
 
-starButton.addEventListener("click", () => {
+starButton.addEventListener("click", async () => {
 
-    task.starred = !task.starred;
+    const user = auth.currentUser;
 
-    starButton.textContent =
-        task.starred ? "★" : "☆";
+    if (!user) {
 
-    console.log(
-        "Task starred:",
-        task.starred
-    );
+        console.error(
+            "No authenticated user."
+        );
+
+        return;
+
+    }
+
+    const newStarState =
+        !task.starred;
+
+    try {
+
+        const taskRef = doc(
+            db,
+            "users",
+            user.uid,
+            "tasks",
+            task.id
+        );
+
+        await updateDoc(
+            taskRef,
+            {
+                starred: newStarState
+            }
+        );
+
+        task.starred =
+            newStarState;
+
+        starButton.textContent =
+            task.starred ? "★" : "☆";
+
+        console.log(
+            "Task star saved:",
+            task.starred
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Failed to update star:",
+            error
+        );
+
+    }
 
 });
 
@@ -539,7 +678,7 @@ starButton.addEventListener("click", () => {
 const deleteButton =
     taskCard.querySelector(".more-btn");
 
-deleteButton.addEventListener("click", () => {
+deleteButton.addEventListener("click", async () => {
 
     const confirmed =
         confirm(`Delete "${task.title}"?`);
@@ -548,16 +687,48 @@ deleteButton.addEventListener("click", () => {
         return;
     }
 
-    taskCard.remove();
+    try {
 
-    console.log(
-        "Task deleted:",
-        task
-    );
+        const user = auth.currentUser;
 
-    updateProgress();
+        if (!user) {
 
-    updateTaskCount();
+            console.error(
+                "No authenticated user."
+            );
+
+            return;
+
+        }
+
+        const taskRef = doc(
+            db,
+            "users",
+            user.uid,
+            "tasks",
+            task.id
+        );
+
+        await deleteDoc(taskRef);
+
+        taskCard.remove();
+
+        console.log(
+            "Task deleted from Firestore:",
+            task
+        );
+
+        updateProgress();
+        updateTaskCount();
+
+    } catch (error) {
+
+        console.error(
+            "Failed to delete task:",
+            error
+        );
+
+    }
 
 });
 
@@ -790,3 +961,72 @@ function updateTaskCount() {
 }
 
 updateTaskCount();
+
+// ======================================
+// Load Tasks From Firestore
+// ======================================
+
+async function loadTasks() {
+
+    const user = auth.currentUser;
+
+    if (!user) {
+
+        console.error(
+            "No authenticated user."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const tasksCollection =
+            collection(
+                db,
+                "users",
+                user.uid,
+                "tasks"
+            );
+
+
+        const snapshot =
+            await getDocs(tasksCollection);
+
+
+       snapshot.forEach((doc) => {
+
+    const task = {
+
+        id: doc.id,
+
+        ...doc.data()
+
+    };
+
+    console.log(
+        "Task loaded:",
+        task
+    );
+
+    addTaskToUI(task);
+
+});
+
+// Update dashboard after Firestore tasks are loaded
+updateProgress();
+updateTaskCount();
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load tasks:",
+            error
+        );
+
+    }
+
+}
