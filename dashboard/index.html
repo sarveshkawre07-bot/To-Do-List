@@ -193,17 +193,20 @@
             <section class="progress-section">
 
                 <div class="progress-header">
-
+                    
                     <span>Today's Progress</span>
-
-                    <strong>3 / 5 completed</strong>
-
+                    
+                    <strong id="progressText">0 / 0 completed</strong>
+                
                 </div>
 
 
                 <div class="progress-bar">
 
-                    <div class="progress-fill"></div>
+                    <div
+                    class="progress-fill"
+                    id="progressFill"
+                    ></div>
 
                 </div>
 
@@ -233,7 +236,10 @@
                     <article class="task-card">
 
                         <div class="task-check">
-                            <input type="checkbox">
+                            <input
+                            type="checkbox"
+                            class="task-checkbox"
+                            >
                         </div>
 
 
@@ -279,7 +285,10 @@
                     <article class="task-card">
 
                         <div class="task-check">
-                            <input type="checkbox">
+                            <input
+                            type="checkbox"
+                            class="task-checkbox"
+                            >
                         </div>
 
 
@@ -323,7 +332,9 @@
                     <article class="task-card completed">
 
                         <div class="task-check">
-                            <input type="checkbox" checked>
+                            <input type="checkbox"
+                            class="task-checkbox"
+                            checked>
                         </div>
 
 

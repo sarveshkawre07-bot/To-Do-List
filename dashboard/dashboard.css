@@ -380,9 +380,11 @@ button {
 .progress-fill {
     height: 100%;
 
-    width: 60%;
+    width: 0%;
 
     background: #2563eb;
+
+    transition: width 0.3s ease;
 }
 
 

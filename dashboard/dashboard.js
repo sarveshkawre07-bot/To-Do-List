@@ -227,6 +227,8 @@ taskForm.addEventListener("submit", (event) => {
 
     addTaskToUI(task);
 
+    updateProgress();
+
 
     // Close modal
 
@@ -295,13 +297,12 @@ function addTaskToUI(task) {
         <div class="task-actions">
 
             <button class="star-btn">
-    ${task.starred ? "★" : "☆"}
-</button>
-
-            <button class="more-btn">
-                ⋮
+            ${task.starred ? "★" : "☆"}
             </button>
 
+            <button class="more-btn" title="Delete task">
+            🗑️
+            </button>
         </div>
 
     `;
@@ -327,6 +328,8 @@ checkbox.addEventListener("change", () => {
         task.completed
     );
 
+    updateProgress();
+
 });
 
 const starButton =
@@ -344,6 +347,31 @@ starButton.addEventListener("click", () => {
         "Task starred:",
         task.starred
     );
+
+});
+
+// Delete Task
+
+const deleteButton =
+    taskCard.querySelector(".more-btn");
+
+deleteButton.addEventListener("click", () => {
+
+    const confirmed =
+        confirm(`Delete "${task.title}"?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    taskCard.remove();
+
+    console.log(
+        "Task deleted:",
+        task
+    );
+
+    updateProgress();
 
 });
 
@@ -409,3 +437,110 @@ function getPriorityIcon(priority) {
     return icons[priority] || "⚪";
 
 }
+
+// ======================================
+// Task Progress
+// ======================================
+
+function updateProgress() {
+
+    const tasks =
+        document.querySelectorAll(".task-card");
+
+    const completedTasks =
+        document.querySelectorAll(
+            ".task-card.completed"
+        );
+
+    const total =
+        tasks.length;
+
+    const completed =
+        completedTasks.length;
+
+
+    // Update text
+
+    const progressText =
+        document.getElementById("progressText");
+
+    if (progressText) {
+
+        progressText.textContent =
+            `${completed} / ${total} completed`;
+
+    }
+
+
+    // Calculate percentage
+
+    let percentage = 0;
+
+    if (total > 0) {
+
+        percentage =
+            (completed / total) * 100;
+
+    }
+
+
+    // Update progress bar
+
+    const progressFill =
+        document.getElementById("progressFill");
+
+    if (progressFill) {
+
+        progressFill.style.width =
+            `${percentage}%`;
+
+    }
+
+}
+
+// ======================================
+// Existing Task Checkboxes
+// ======================================
+
+function setupExistingTaskCheckboxes() {
+
+    const taskCards =
+        document.querySelectorAll(".task-card");
+
+
+    taskCards.forEach((taskCard) => {
+
+        const checkbox =
+            taskCard.querySelector(".task-checkbox");
+
+
+        if (!checkbox) {
+            return;
+        }
+
+
+        checkbox.addEventListener("change", () => {
+
+            taskCard.classList.toggle(
+                "completed",
+                checkbox.checked
+            );
+
+
+            console.log(
+                "Existing task completed:",
+                checkbox.checked
+            );
+
+
+            updateProgress();
+
+        });
+
+    });
+
+}
+
+setupExistingTaskCheckboxes();
+
+updateProgress();
