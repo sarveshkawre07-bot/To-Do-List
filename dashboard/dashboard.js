@@ -196,6 +196,9 @@ taskForm.addEventListener("submit", (event) => {
     const priority =
         document.getElementById("taskPriority").value;
 
+    const dueDate =
+    document.getElementById("taskDueDate").value;
+
 
     // Create task object
 
@@ -214,6 +217,8 @@ taskForm.addEventListener("submit", (event) => {
         completed: false,
 
         starred: false,
+
+        dueDate: dueDate,
 
         createdAt: new Date()
 
