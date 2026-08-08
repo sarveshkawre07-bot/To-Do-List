@@ -201,11 +201,12 @@ addSubtaskButton.addEventListener("click", () => {
 
 
     if (!title) {
+        input.focus();
         return;
     }
 
 
-    subtasks.push({
+    const subtask = {
 
         id: Date.now(),
 
@@ -213,7 +214,18 @@ addSubtaskButton.addEventListener("click", () => {
 
         completed: false
 
-    });
+    };
+
+
+    subtasks.push(subtask);
+
+
+    renderSubtasks();
+
+
+    input.value = "";
+
+    input.focus();
 
 
     console.log(
@@ -221,10 +233,83 @@ addSubtaskButton.addEventListener("click", () => {
         subtasks
     );
 
-
-    input.value = "";
-
 });
+
+function renderSubtasks() {
+
+    const existingItems =
+        subtaskContainer.querySelectorAll(
+            ".subtask-item"
+        );
+
+
+    existingItems.forEach(item => {
+        item.remove();
+    });
+
+
+    subtasks.forEach((subtask) => {
+
+        const subtaskElement =
+            document.createElement("div");
+
+
+        subtaskElement.className =
+            "subtask-item";
+
+
+        subtaskElement.innerHTML = `
+
+            <span class="subtask-check">
+                ☐
+            </span>
+
+            <span class="subtask-name">
+                ${subtask.title}
+            </span>
+
+            <button
+                type="button"
+                class="remove-subtask"
+                data-id="${subtask.id}"
+                title="Remove subtask"
+            >
+                ×
+            </button>
+
+        `;
+
+
+        const removeButton =
+            subtaskElement.querySelector(
+                ".remove-subtask"
+            );
+
+
+        removeButton.addEventListener(
+            "click",
+            () => {
+
+                subtasks =
+                    subtasks.filter(
+                        item =>
+                            item.id !== subtask.id
+                    );
+
+
+                renderSubtasks();
+
+            }
+        );
+
+
+        subtaskContainer.appendChild(
+            subtaskElement
+        );
+
+    });
+
+}
 
 
 taskForm.addEventListener("submit", (event) => {
@@ -300,6 +385,8 @@ taskForm.addEventListener("submit", (event) => {
     addTaskToUI(task);
 
     updateProgress();
+
+    updateTaskCount();
 
 
     // Close modal
@@ -469,6 +556,8 @@ deleteButton.addEventListener("click", () => {
     );
 
     updateProgress();
+
+    updateTaskCount();
 
 });
 
@@ -666,3 +755,38 @@ function setupExistingTaskCheckboxes() {
 setupExistingTaskCheckboxes();
 
 updateProgress();
+
+// ======================================
+// Task Count
+// ======================================
+
+function updateTaskCount() {
+
+    const taskCards =
+        document.querySelectorAll(".task-card");
+
+    const taskCount =
+        taskCards.length;
+
+    const taskCountText =
+        document.getElementById("taskCountText");
+
+    if (!taskCountText) {
+        return;
+    }
+
+    if (taskCount === 1) {
+
+        taskCountText.textContent =
+            "You have 1 task planned for today.";
+
+    } else {
+
+        taskCountText.textContent =
+            `You have ${taskCount} tasks planned for today.`;
+
+    }
+
+}
+
+updateTaskCount();

@@ -17,6 +17,10 @@ button {
     cursor: pointer;
 }
 
+.form-group {
+    margin-bottom: 18px;
+}
+
 
 .app {
     display: flex;
@@ -644,6 +648,10 @@ button {
         0 20px 50px rgba(0, 0, 0, 0.15);
 
     animation: modalAppear 0.2s ease;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
 }
 
 
@@ -860,5 +868,162 @@ button {
     .create-task-btn {
         width: 100%;
     }
+
+}
+
+/* ======================================
+   Subtask Add Button
+   ====================================== */
+
+#addSubtaskBtn {
+
+    background: #2563eb;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 9px 14px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease;
+
+}
+
+
+#addSubtaskBtn:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+#addSubtaskBtn:active {
+
+    transform: scale(0.97);
+
+}
+
+/* ======================================
+   Subtask Input
+   ====================================== */
+
+.subtask-input {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.subtask-input .subtask-title {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.subtask-input #addSubtaskBtn {
+
+    flex-shrink: 0;
+
+}
+
+#subtaskInputContainer {
+
+    width: 100%;
+
+}
+
+
+.subtask-input .subtask-title {
+
+    height: 42px;
+
+    box-sizing: border-box;
+
+}
+
+/* ======================================
+   Subtask List
+   ====================================== */
+
+.subtask-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px 11px;
+
+    margin-top: 8px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+}
+
+
+.subtask-check {
+
+    color: #64748b;
+
+    font-size: 16px;
+
+}
+
+
+.subtask-name {
+
+    flex: 1;
+
+    font-size: 14px;
+
+    color: #334155;
+
+}
+
+
+.remove-subtask {
+
+    border: none;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    font-size: 20px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    padding: 2px 5px;
+
+}
+
+
+.remove-subtask:hover {
+
+    color: #ef4444;
 
 }
