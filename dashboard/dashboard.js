@@ -551,67 +551,47 @@ const checkbox =
 
 checkbox.addEventListener("change", async () => {
 
-    const user = auth.currentUser;
+    const completed =
+        checkbox.checked;
 
-    if (!user) {
-
-        console.error(
-            "No authenticated user."
+    const result =
+        await handleTaskCompletion(
+            task,
+            taskCard,
+            completed
         );
+
+    // Firestore update failed
+    if (!result) {
+
+        checkbox.checked =
+            task.completed;
 
         return;
 
     }
 
-    const newCompletedState =
-        checkbox.checked;
+    // Task was just completed
+    if (result.completedNow) {
 
-    try {
-
-        const taskRef = doc(
-            db,
-            "users",
-            user.uid,
-            "tasks",
+        console.log(
+            "Completion event triggered:",
             task.id
         );
 
-        await updateDoc(
-            taskRef,
-            {
-                completed: newCompletedState
-            }
-        );
+    }
 
-        task.completed =
-            newCompletedState;
-
-        taskCard.classList.toggle(
-            "completed",
-            task.completed
-        );
+    // Task was just uncompleted
+    if (result.uncompletedNow) {
 
         console.log(
-            "Task completion saved:",
-            task.completed
+            "Task completion undone:",
+            task.id
         );
-
-        updateProgress();
-
-    } catch (error) {
-
-        console.error(
-            "Failed to update task:",
-            error
-        );
-
-        // Revert checkbox if Firestore update fails
-        checkbox.checked =
-            task.completed;
 
     }
 
-});;
+});
 
 const starButton =
     taskCard.querySelector(".star-btn");
@@ -723,10 +703,14 @@ deleteButton.addEventListener("click", async () => {
 
     } catch (error) {
 
-        console.error(
-            "Failed to delete task:",
-            error
-        );
+    console.error(
+        "Failed to delete task:",
+        error
+    );
+
+    alert(
+        "Unable to delete this task. Please try again."
+    );
 
     }
 
@@ -962,6 +946,7 @@ function updateTaskCount() {
 
 updateTaskCount();
 
+
 // ======================================
 // Load Tasks From Firestore
 // ======================================
@@ -980,7 +965,6 @@ async function loadTasks() {
 
     }
 
-
     try {
 
         const tasksCollection =
@@ -991,34 +975,31 @@ async function loadTasks() {
                 "tasks"
             );
 
-
         const snapshot =
             await getDocs(tasksCollection);
 
+        snapshot.forEach((doc) => {
 
-       snapshot.forEach((doc) => {
+            const task = {
 
-    const task = {
+                id: doc.id,
 
-        id: doc.id,
+                ...doc.data()
 
-        ...doc.data()
+            };
 
-    };
+            console.log(
+                "Task loaded:",
+                task
+            );
 
-    console.log(
-        "Task loaded:",
-        task
-    );
+            addTaskToUI(task);
 
-    addTaskToUI(task);
+        });
 
-});
-
-// Update dashboard after Firestore tasks are loaded
-updateProgress();
-updateTaskCount();
-
+        // Update dashboard after Firestore tasks are loaded
+        updateProgress();
+        updateTaskCount();
 
     } catch (error) {
 
@@ -1026,6 +1007,92 @@ updateTaskCount();
             "Failed to load tasks:",
             error
         );
+
+    }
+
+}
+
+
+// ======================================
+// Task Completion
+// ======================================
+
+async function handleTaskCompletion(
+    task,
+    taskCard,
+    completed
+) {
+
+    const user = auth.currentUser;
+
+    const wasCompleted = task.completed;
+
+    if (!user) {
+
+        console.error(
+            "No authenticated user."
+        );
+
+        return false;
+
+    }
+
+    try {
+
+        const taskRef = doc(
+            db,
+            "users",
+            user.uid,
+            "tasks",
+            task.id
+        );
+
+        await updateDoc(
+            taskRef,
+            {
+                completed: completed
+            }
+        );
+
+        task.completed =
+            completed;
+
+        // Detect a real completion event
+if (!wasCompleted && completed) {
+
+    console.log(
+        "Task completed for the first time:",
+        task.id
+    );
+
+}
+
+        taskCard.classList.toggle(
+            "completed",
+            completed
+        );
+
+        updateProgress();
+
+        console.log(
+            "Task completion saved:",
+            completed
+        );
+
+        return {
+    success: true,
+    completedNow: !wasCompleted && completed,
+    uncompletedNow: wasCompleted && !completed
+};
+
+    } catch (error) {
+
+        console.error(
+            "Failed to update task completion:",
+            error
+        );
+
+        return false;
 
     }
 
