@@ -205,6 +205,9 @@ taskForm.addEventListener("submit", (event) => {
     const reminder =
     document.getElementById("taskReminder").value;
 
+    const repeat =
+    document.getElementById("taskRepeat").value;
+
 
     // Create task object
 
@@ -229,6 +232,8 @@ taskForm.addEventListener("submit", (event) => {
         dueTime: dueTime,
 
         reminder: reminder,
+
+        repeat: repeat,
 
         createdAt: new Date()
 
