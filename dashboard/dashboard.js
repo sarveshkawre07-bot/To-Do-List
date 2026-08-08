@@ -199,6 +199,12 @@ taskForm.addEventListener("submit", (event) => {
     const dueDate =
     document.getElementById("taskDueDate").value;
 
+    const dueTime =
+    document.getElementById("taskDueTime").value;
+
+    const reminder =
+    document.getElementById("taskReminder").value;
+
 
     // Create task object
 
@@ -219,6 +225,10 @@ taskForm.addEventListener("submit", (event) => {
         starred: false,
 
         dueDate: dueDate,
+
+        dueTime: dueTime,
+
+        reminder: reminder,
 
         createdAt: new Date()
 
@@ -285,16 +295,39 @@ function addTaskToUI(task) {
 
             <div class="task-meta">
 
-                <span>
-                    📁 ${formatCategory(task.category)}
-                </span>
+    <span>
+        📁 ${formatCategory(task.category)}
+    </span>
 
-                <span>
-                    ${getPriorityIcon(task.priority)}
-                    ${formatPriority(task.priority)}
-                </span>
+    <span>
+        ${getPriorityIcon(task.priority)}
+        ${formatPriority(task.priority)}
+    </span>
 
-            </div>
+    ${
+        task.dueDate && task.dueTime
+        ? `
+            <span>
+                📅 ${task.dueDate}
+                ⏰ ${formatTime(task.dueTime)}
+            </span>
+        `
+        : task.dueDate
+        ? `
+            <span>
+                📅 ${task.dueDate}
+            </span>
+        `
+        : task.dueTime
+        ? `
+            <span>
+                ⏰ ${formatTime(task.dueTime)}
+            </span>
+        `
+        : ""
+    }
+
+</div>
 
         </div>
 
@@ -440,6 +473,31 @@ function getPriorityIcon(priority) {
     };
 
     return icons[priority] || "⚪";
+
+}
+
+function formatTime(time) {
+
+    if (!time) {
+        return "";
+    }
+
+    const [hours, minutes] = time.split(":");
+
+    const date = new Date();
+
+    date.setHours(
+        Number(hours),
+        Number(minutes)
+    );
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
 
 }
 
