@@ -1,6 +1,6 @@
 ﻿/**
  * scoring.js
- * Task Recommendation Scoring Engine - USP MVP Step 2
+ * Task Recommendation Scoring Engine - USP MVP Step 7 (V2)
  *
  * Public API:
  *   calculateTaskScore(task)              -> { score, breakdown }
@@ -11,16 +11,16 @@
  */
 
 // ============================================================
-// 1. PRIORITY SCORE  (0-30)
+// 1. PRIORITY SCORE  (0-40)
 // ============================================================
 
 function getPriorityScore(task) {
-    const map = { high: 30, medium: 20, low: 10 };
-    return map[task.priority] ?? 10;
+    const map = { high: 40, medium: 28, low: 15 };
+    return map[task.priority] ?? 15;
 }
 
 // ============================================================
-// 2. DUE-DATE SCORE  (0-35)
+// 2. DUE-DATE SCORE  (0-40)
 // ============================================================
 
 function getDueDateTime(task) {
@@ -58,12 +58,12 @@ function getCalendarDayDiff(task) {
 function getDueDateScore(task) {
     const diff = getCalendarDayDiff(task);
     if (diff === null) return 0;
-    if (diff < 0)  return 35;
-    if (diff === 0) return 30;
-    if (diff === 1) return 25;
-    if (diff <= 3) return 18;
-    if (diff <= 7) return 10;
-    return 5;
+    if (diff < 0)   return 40;  // overdue
+    if (diff === 0) return 35;  // due today
+    if (diff === 1) return 28;  // due tomorrow
+    if (diff <= 3)  return 18;  // within 3 days
+    if (diff <= 7)  return 10;  // within 7 days
+    return 4;                   // later
 }
 
 // ============================================================
@@ -75,13 +75,17 @@ function getImportantScore(task) {
 }
 
 // ============================================================
-// 4. ESTIMATED EFFORT SCORE  (0-20)
+// 4. ESTIMATED EFFORT SCORE  (0-5)
+//
+// Effort is a secondary tiebreaker only.
+// Short tasks get a small nudge; long tasks lose a small amount.
+// This must never override priority or due-date urgency.
 // ============================================================
 
 function getEffortScore(task) {
     const effort = task.estimatedEffort ?? "30";
-    const map = { "15": 20, "30": 18, "60": 14, "120": 8, "180+": 4 };
-    return map[effort] ?? 18;
+    const map = { "15": 5, "30": 4, "60": 3, "120": 2, "180+": 1 };
+    return map[effort] ?? 4;  // unknown -> treat as 30 min
 }
 
 // ============================================================
@@ -91,6 +95,8 @@ function getEffortScore(task) {
 /**
  * calculateTaskScore(task)
  * Returns { score: number, breakdown: { priority, dueDate, important, effort } }
+ *
+ * Max score = 100  (priority 40 + dueDate 40 + important 15 + effort 5)
  */
 export function calculateTaskScore(task) {
     const priority  = getPriorityScore(task);

@@ -317,18 +317,59 @@ let editingTaskCard = null;
 // Kept in sync by addTaskToUI (add) and the delete/edit flows (remove+re-add).
 let allTasks = [];
 
-function logRecommendation() {
+function updateRecommendationUI() {
+    const recCard  = document.getElementById("rec-card");
+    const recEmpty = document.getElementById("rec-empty");
+    const recTitle = document.getElementById("rec-title");
+    const recMeta  = document.getElementById("rec-meta");
+    const recBtn   = document.getElementById("rec-start-btn");
+
+    if (!recCard || !recEmpty) return;
+
     const result = getRecommendedTask(allTasks);
+
     if (!result) {
-        console.log("[Recommendation] Recommended task: None");
+        recCard.style.display  = "none";
+        recEmpty.style.display = "block";
         return;
     }
+
+    // Build concise meta line from reasons
     const reasons = getRecommendationReasons(result.task, result.breakdown);
-    console.log(
-        "[Recommendation] Recommended task:", result.task.title, "\n"
-        + "  Score: " + result.score + "\n"
-        + "  Reasons:\n    " + reasons.join("\n    ")
-    );
+    // reasons = [priority, due, (optional "Marked important"), effort]
+    const metaParts = [];
+    // Due label (index 1)
+    if (reasons[1] && reasons[1] !== "No due date") metaParts.push(reasons[1]);
+    // Priority (index 0)
+    metaParts.push(reasons[0]);
+    // Effort (last item)
+    const effortLabel = reasons[reasons.length - 1];
+    if (effortLabel && effortLabel.startsWith("Estimated effort:")) {
+        metaParts.push(effortLabel.replace("Estimated effort: ", ""));
+    }
+
+    recTitle.textContent = result.task.title;
+    recMeta.textContent  = metaParts.join(" · ");
+
+    // Wire Start Task button (replace to avoid duplicate listeners)
+    const freshBtn = recBtn.cloneNode(true);
+    recBtn.parentNode.replaceChild(freshBtn, recBtn);
+    freshBtn.addEventListener("click", () => {
+        // Scroll the task card into view and highlight it.
+        // Does NOT complete the task — completion stays with the checkbox.
+        const taskCard = [...document.querySelectorAll(".task-card")]
+            .find(card => {
+                const h3 = card.querySelector("h3");
+                return h3 && h3.textContent.trim() === result.task.title.trim();
+            });
+        if (!taskCard) return;
+        taskCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        taskCard.classList.add("task-highlighted");
+        setTimeout(() => taskCard.classList.remove("task-highlighted"), 1800);
+    });
+
+    recCard.style.display  = "flex";
+    recEmpty.style.display = "none";
 }
 
 // ======================================
@@ -1815,7 +1856,7 @@ function updateProgress() {
     }
 
     // Recalculate recommendation whenever task set changes
-    logRecommendation();
+    updateRecommendationUI();
 
 }
 
