@@ -619,6 +619,11 @@
         "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
         "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
         "timestamp": 1786300319552
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300332962
       }
     ],
     "4.2 Write property test for MM:SS formatting (Property 4)": [
@@ -626,6 +631,11 @@
         "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
         "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
         "timestamp": 1786299996636
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300338216
       }
     ],
     "4.4 Write property test for pause→resume round-trip (Property 5)": [
@@ -633,6 +643,11 @@
         "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
         "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
         "timestamp": 1786300001697
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300342802
       }
     ],
     "4.5 Write property test for timer floor (Property 6)": [
@@ -640,6 +655,11 @@
         "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
         "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
         "timestamp": 1786300006609
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300347721
       }
     ],
     "6.2 Write property test for overlay population (Property 1)": [
@@ -647,6 +667,39 @@
         "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
         "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
         "timestamp": 1786300011688
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300352493
+      }
+    ],
+    "6.3 Write property test for due date conditional rendering (Property 2)": [
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300357069
+      }
+    ],
+    "6.5 Write property test for open/close round-trip (Property 8 & 9)": [
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300362127
+      }
+    ],
+    "7.3 Write property test for complete-task round-trip (Property 10)": [
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300367395
+      }
+    ],
+    "8.3 Write property test for focus button presence (Property 3)": [
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300372644
       }
     ]
   }

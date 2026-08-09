@@ -41,7 +41,7 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
     - Add `const focusState = { task, totalSeconds, remaining, running, intervalId, startEpoch, pausedAt }` (all initialised to null/0/false)
     - Implement `effortToSeconds(effort)` using the lookup map `{ "15": 900, "30": 1800, "60": 3600, "120": 7200, "180+": 5400 }` with 1500 fallback
     - _Requirements: 3.3_
-  - [~]* 3.2 Write property test for `effortToSeconds` (Property 7)
+  - [-]* 3.2 Write property test for `effortToSeconds` (Property 7)
     - **Property 7: effortToSeconds covers all defined effort values**
     - For each value in `["15", "30", "60", "120", "180+"]` assert return equals minutes × 60; assert `"180+"` returns 5400; assert unknown string returns 1500
     - **Validates: Requirements 3.3**
@@ -51,7 +51,7 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
     - `updateTimerDisplay` reads `focusState.remaining`, formats as zero-padded MM:SS, writes to `#focus-timer-display`
     - `updateRingProgress` computes `offset = RING_CIRCUMFERENCE * (1 - remaining / totalSeconds)` and sets `style.strokeDashoffset` on `#focus-ring-progress`; clamp ratio to [0,1] when totalSeconds is 0
     - _Requirements: 3.1_
-  - [ ]* 4.2 Write property test for MM:SS formatting (Property 4)
+  - [-]* 4.2 Write property test for MM:SS formatting (Property 4)
     - **Property 4: MM:SS timer formatting is correct for all valid durations**
     - For integers 0, 1, 59, 60, 599, 600, 3599, 3600, 10800 assert `updateTimerDisplay` writes text matching `/^\d{2}:\d{2}$/` with correct minute and second values
     - **Validates: Requirements 3.1**
@@ -60,11 +60,11 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
     - `pauseTimer`: clear interval, set `running = false`, `pausedAt = remaining`, update button label to "Resume"
     - `resumeTimer`: set `startEpoch = Date.now()`, call `startTimer()`, update button label to "Pause"
     - _Requirements: 3.2, 3.3, 3.4, 3.5, 3.6_
-  - [ ]* 4.4 Write property test for pause→resume round-trip (Property 5)
+  - [-]* 4.4 Write property test for pause→resume round-trip (Property 5)
     - **Property 5: Pause → Resume is a round-trip on remaining time**
     - Stub `Date.now` and `setInterval`/`clearInterval`; call `startTimer()`, then `pauseTimer()`, then `resumeTimer()` with no clock ticks; assert `focusState.remaining === R` and `focusState.running === true`
     - **Validates: Requirements 3.2, 3.3**
-  - [ ]* 4.5 Write property test for timer floor (Property 6)
+  - [-]* 4.5 Write property test for timer floor (Property 6)
     - **Property 6: Timer remaining never goes below zero**
     - Simulate ticks that overshoot remaining; assert `focusState.remaining >= 0` after each tick; assert subsequent ticks keep remaining at 0
     - **Validates: Requirements 3.5**
@@ -79,11 +79,11 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
     - Call `updateTimerDisplay()` and `updateRingProgress()`; reset done banner to hidden; reset pause button label to "Pause"
     - Build subtask `<label>` elements with checkboxes wired to `handleFocusSubtaskToggle`; show/hide `#focus-subtasks-details`
     - _Requirements: 1.4, 1.5_
-  - [ ]* 6.2 Write property test for overlay population (Property 1)
+  - [-]* 6.2 Write property test for overlay population (Property 1)
     - **Property 1: Task metadata is fully rendered in the focus overlay**
     - For representative task objects call `populateFocusOverlay(task)`; assert `#focus-task-title`, `#focus-category-badge`, `#focus-priority-badge`, `#focus-effort-badge` all contain the expected text
     - **Validates: Requirements 1.4**
-  - [ ]* 6.3 Write property test for due date conditional rendering (Property 2)
+  - [-]* 6.3 Write property test for due date conditional rendering (Property 2)
     - **Property 2: Due date/time is rendered if and only if present**
     - For tasks with both fields, only dueDate, only dueTime, and neither: assert `#focus-task-due` display and text content behave as specified
     - **Validates: Requirements 1.5**
@@ -91,7 +91,7 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
     - `openFocusMode`: guard on null task; populate `focusState`; call `populateFocusOverlay`; set overlay `display: flex`; call `startTimer()`
     - `closeFocusMode`: clear interval; reset `running` and `task`; set overlay `display: none`; call `updateRecommendationUI()`
     - _Requirements: 1.1, 1.2, 1.3, 5.2, 5.3, 5.4, 7.1, 7.2_
-  - [ ]* 6.5 Write property test for open/close round-trip (Property 8 & 9)
+  - [-]* 6.5 Write property test for open/close round-trip (Property 8 & 9)
     - **Property 8: Exit round-trip — task state is unchanged**
     - **Property 9: Focus overlay hides and restores via fixed positioning**
     - Assert `task.completed` unchanged after `closeFocusMode()`; assert overlay `display === "none"` after close and `!== "none"` after open
@@ -104,7 +104,7 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
   - [x] 7.2 Implement `handleFocusSubtaskToggle(subtask, checked, countEl, labelEl)`
     - Optimistically update `subtask.completed`; compute `allDone`; write `{ subtasks, completed: allDone }` via `updateDoc`; update count badge and label class; sync matching main-list card checkbox; on error revert checkbox and log
     - _Requirements: 4.2_
-  - [ ]* 7.3 Write property test for complete-task round-trip (Property 10)
+  - [-]* 7.3 Write property test for complete-task round-trip (Property 10)
     - **Property 10: Complete task round-trip — completed state reflects in card**
     - Mock `handleTaskCompletion` to resolve; call `handleFocusComplete()`; assert matching task card has `completed` class and checkbox is checked
     - **Validates: Requirements 4.2, 4.3, 4.4**
@@ -119,7 +119,7 @@ Implement the Focus Mode overlay entirely within the three existing files (`inde
   - [x] 8.2 Add "Focus" button to task card menu in `addTaskToUI()`
     - Create a `<button>` with text `"🎯 Focus"`, append to `.task-menu`; on click: close menu, call `openFocusMode(task)`
     - _Requirements: 2.1, 2.2_
-  - [ ]* 8.3 Write property test for focus button presence (Property 3)
+  - [-]* 8.3 Write property test for focus button presence (Property 3)
     - **Property 3: Focus button exists on every task card**
     - For representative task objects rendered via `addTaskToUI(task)`, assert the resulting `.task-menu` contains a button whose textContent includes "Focus"
     - **Validates: Requirements 2.1, 2.2**
