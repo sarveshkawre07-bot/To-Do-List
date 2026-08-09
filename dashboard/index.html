@@ -30,22 +30,22 @@
 
                 <p class="nav-title">MAIN</p>
 
-                <a href="#" class="nav-item active">
+                <a href="#" class="nav-item active" data-page="today">
                     <span>🏠</span>
                     <span>Today</span>
                 </a>
 
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-page="all-tasks">
                     <span>📋</span>
                     <span>All Tasks</span>
                 </a>
 
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-page="important">
                     <span>⭐</span>
                     <span>Important</span>
                 </a>
 
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-page="calendar">
                     <span>📅</span>
                     <span>Calendar</span>
                 </a>
@@ -53,27 +53,9 @@
 
                 <p class="nav-title">PRODUCTIVITY</p>
 
-                <a href="#" class="nav-item">
-                    <span>🎯</span>
-                    <span>Goals</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>📊</span>
-                    <span>Progress</span>
-                </a>
-
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-page="focus">
                     <span>🍅</span>
                     <span>Focus</span>
-                </a>
-
-
-                <p class="nav-title">ORGANIZATION</p>
-
-                <a href="#" class="nav-item">
-                    <span>📁</span>
-                    <span>Categories</span>
                 </a>
 
             </nav>
@@ -109,7 +91,7 @@
             <header class="top-bar">
 
                 <div>
-                    <h1>Today</h1>
+                    <h1 id="pageTitle">Today</h1>
                     <p id="currentDate"></p>
                 </div>
 
@@ -150,125 +132,305 @@
             </header>
 
 
-            <!-- GREETING -->
+            <!-- ================= TODAY PAGE ================= -->
 
-            <section class="greeting">
+            <div id="page-today" class="page-section">
 
-                <h2>
-                    <span id="greetingText">Good morning</span>,
-                    <span id="userName">User</span> 👋
-                </h2>
+                <!-- GREETING -->
 
-                <p id="taskCountText">You have 0 tasks planned for today.</p>
+                <section class="greeting">
 
-            </section>
+                    <h2>
+                        <span id="greetingText">Good morning</span>,
+                        <span id="userName">User</span> 👋
+                    </h2>
 
+                    <p id="taskCountText">You have 0 tasks planned for today.</p>
 
-            <!-- SEARCH + ADD TASK -->
-
-            <section class="task-controls">
-
-                <div class="search-box">
-
-                    <span>🔍</span>
-
-                    <input
-                        type="text"
-                        placeholder="Search tasks..."
-                        id="searchInput"
-                    >
-
-                </div>
+                </section>
 
 
-                <button id="addTaskBtn" class="add-task-btn">
+                <!-- SEARCH + ADD TASK -->
 
-                    <span>+</span>
+                <section class="task-controls">
 
-                    Add Task
+                    <div class="search-box">
 
-                </button>
+                        <span>🔍</span>
 
-            </section>
+                        <input
+                            type="text"
+                            placeholder="Search tasks..."
+                            id="searchInput"
+                        >
 
-
-            <!-- PROGRESS -->
-
-            <section class="progress-section">
-
-                <div class="progress-header">
-                    
-                    <span>Today's Progress</span>
-                    
-                    <strong id="progressText">0 / 0 completed</strong>
-                
-                </div>
-
-
-                <div class="progress-bar">
-
-                    <div
-                    class="progress-fill"
-                    id="progressFill"
-                    ></div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- RECOMMENDATION -->
-
-            <section id="recommendation-section">
-
-                <!-- Active recommendation -->
-                <div id="rec-card" class="rec-card" style="display:none;">
-
-                    <div class="rec-header">
-                        <span class="rec-label">✨ What should I do now?</span>
                     </div>
 
-                    <div class="rec-body">
-                        <h3 id="rec-title" class="rec-title"></h3>
-                        <p  id="rec-meta"  class="rec-meta"></p>
-                    </div>
 
-                    <div class="rec-footer">
-                        <button id="rec-start-btn" class="rec-start-btn" type="button">
-                            Start Task
-                        </button>
-                    </div>
+                    <button id="addTaskBtn" class="add-task-btn">
 
-                </div>
+                        <span>+</span>
 
-                <!-- All caught up -->
-                <div id="rec-empty" class="rec-empty" style="display:none;">
-                    🎉 You're all caught up!
-                </div>
+                        Add Task
 
-            </section>
-
-            <!-- TASKS -->
-
-            <section class="tasks-section">
-
-                <div class="section-header">
-
-                    <h2>Today's Tasks</h2>
-
-                    <button class="filter-btn">
-                        Filter ▾
                     </button>
 
+                </section>
+
+
+                <!-- PROGRESS -->
+
+                <section class="progress-section">
+
+                    <div class="progress-header">
+                        
+                        <span>Today's Progress</span>
+                        
+                        <strong id="progressText">0 / 0 completed</strong>
+                    
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                        class="progress-fill"
+                        id="progressFill"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- RECOMMENDATION -->
+
+                <section id="recommendation-section">
+
+                    <!-- Active recommendation -->
+                    <div id="rec-card" class="rec-card" style="display:none;">
+
+                        <div class="rec-header">
+                            <span class="rec-label">✨ What should I do now?</span>
+                        </div>
+
+                        <div class="rec-body">
+                            <h3 id="rec-title" class="rec-title"></h3>
+                            <p  id="rec-meta"  class="rec-meta"></p>
+                        </div>
+
+                        <div class="rec-footer">
+                            <button id="rec-start-btn" class="rec-start-btn" type="button">
+                                Start Task
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- All caught up -->
+                    <div id="rec-empty" class="rec-empty" style="display:none;">
+                        🎉 You're all caught up!
+                    </div>
+
+                </section>
+
+                <!-- TASKS -->
+
+                <section class="tasks-section">
+
+                    <div class="section-header">
+
+                        <h2>Today's Tasks</h2>
+
+                        <button class="filter-btn">
+                            Filter ▾
+                        </button>
+
+                    </div>
+
+
+                    <div id="taskList" class="task-list">
+
+                    </div>
+
+                </section>
+
+            </div><!-- /page-today -->
+
+
+            <!-- ================= ALL TASKS PAGE ================= -->
+
+            <div id="page-all-tasks" class="page-section" style="display:none;">
+
+                <!-- CATEGORY FILTER BAR -->
+
+                <div id="categoryFilterBar" class="category-filter-bar">
+                    <!-- Buttons injected by JS -->
                 </div>
 
+                <!-- ALL TASKS LIST -->
 
-                <div id="taskList" class="task-list">
+                <section class="tasks-section">
 
+                    <div class="section-header">
+                        <h2 id="allTasksSectionTitle">All Tasks</h2>
+                    </div>
+
+                    <div id="allTasksList" class="task-list">
+                    </div>
+
+                </section>
+
+            </div><!-- /page-all-tasks -->
+
+
+            <!-- ================= IMPORTANT PAGE ================= -->
+
+            <div id="page-important" class="page-section" style="display:none;">
+
+                <section class="tasks-section">
+
+                    <div class="section-header">
+                        <h2>Important Tasks</h2>
+                    </div>
+
+                    <div id="importantList" class="task-list">
+                    </div>
+
+                </section>
+
+            </div><!-- /page-important -->
+
+
+            <!-- ================= CALENDAR PAGE ================= -->
+
+            <div id="page-calendar" class="page-section" style="display:none;">
+
+                <!-- CALENDAR NAV -->
+
+                <div class="cal-nav">
+                    <button id="calPrevBtn"  class="cal-nav-btn" type="button" aria-label="Previous month">&#8249;</button>
+                    <button id="calTodayBtn" class="cal-nav-btn cal-nav-btn--today" type="button">Today</button>
+                    <button id="calNextBtn"  class="cal-nav-btn" type="button" aria-label="Next month">&#8250;</button>
+                    <span   id="calMonthLabel" class="cal-month-label"></span>
                 </div>
 
-            </section>
+                <!-- DAY-OF-WEEK HEADER -->
+
+                <div class="cal-dow-header" aria-hidden="true">
+                    <span>Sun</span>
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                </div>
+
+                <!-- MONTH GRID -->
+
+                <div id="calGrid" class="cal-grid" role="grid" aria-label="Calendar">
+                    <!-- Day cells injected by JS -->
+                </div>
+
+                <!-- TASK DETAIL PANEL -->
+
+                <div id="calDetailPanel" class="cal-detail-panel" style="display:none;" role="dialog" aria-label="Task detail">
+                    <div class="cal-detail-header">
+                        <span id="calDetailDate" class="cal-detail-date"></span>
+                        <button id="calDetailClose" class="cal-detail-close" type="button" aria-label="Close">&#x2715;</button>
+                    </div>
+                    <div id="calDetailBody" class="cal-detail-body task-list">
+                        <!-- Task cards injected by JS -->
+                    </div>
+                </div>
+
+            </div><!-- /page-calendar -->
+
+            <!-- ================= FOCUS PAGE ================= -->
+
+            <div id="page-focus" class="page-section" style="display:none;">
+
+                <!-- EMPTY STATE (shown when no task is active) -->
+                <div id="focus-empty-state" class="pomo-empty" style="display:none;">
+                    <div class="pomo-empty-icon">🍅</div>
+                    <p class="pomo-empty-title">Choose a task to start focusing</p>
+                    <p class="pomo-empty-hint">Click <strong>Start Task</strong> on the recommendation card, or use the <strong>🎯 Focus</strong> option on any task.</p>
+                </div>
+
+                <!-- ACTIVE FOCUS WORKSPACE -->
+                <div id="focus-workspace" style="display:none;">
+
+                    <!-- MODE BADGE -->
+                    <div id="pomo-mode-badge" class="pomo-mode-badge pomo-mode-badge--work">WORK</div>
+
+                    <!-- CIRCULAR TIMER -->
+                    <div class="pomo-ring-wrap" role="timer" aria-live="polite" aria-label="Pomodoro timer">
+                        <svg viewBox="0 0 120 120" class="pomo-ring-svg" aria-hidden="true">
+                            <circle class="pomo-ring-track"    cx="60" cy="60" r="54"/>
+                            <circle class="pomo-ring-progress" id="pomo-ring-progress"
+                                    cx="60" cy="60" r="54"/>
+                        </svg>
+                        <span id="pomo-timer-display" class="pomo-timer-display">25:00</span>
+                    </div>
+
+                    <!-- TIMER CONTROLS -->
+                    <div class="pomo-controls">
+                        <button id="pomo-pause-btn"  class="pomo-btn pomo-btn--secondary" type="button">Pause</button>
+                        <button id="pomo-reset-btn"  class="pomo-btn pomo-btn--secondary" type="button">Reset</button>
+                    </div>
+
+                    <!-- SESSION TRANSITION BANNER -->
+                    <div id="pomo-banner" class="pomo-banner" role="alert" aria-live="assertive" style="display:none;"></div>
+
+                    <!-- TASK INFO CARD -->
+                    <div class="pomo-task-card">
+                        <div id="pomo-task-meta" class="pomo-task-meta"></div>
+                        <h2 id="pomo-task-title" class="pomo-task-title"></h2>
+                        <p  id="pomo-task-due"   class="pomo-task-due"   style="display:none;"></p>
+                    </div>
+
+                    <!-- DURATION SETTINGS -->
+                    <div class="pomo-settings">
+
+                        <div class="pomo-setting-group">
+                            <span class="pomo-setting-label">Work</span>
+                            <div class="pomo-chips" role="group" aria-label="Work duration">
+                                <button class="pomo-chip" data-type="work" data-minutes="15"  type="button">15 min</button>
+                                <button class="pomo-chip pomo-chip--active" data-type="work" data-minutes="25"  type="button">25 min</button>
+                                <button class="pomo-chip" data-type="work" data-minutes="30"  type="button">30 min</button>
+                                <button class="pomo-chip" data-type="work" data-minutes="45"  type="button">45 min</button>
+                                <button class="pomo-chip" data-type="work" data-minutes="60"  type="button">60 min</button>
+                            </div>
+                        </div>
+
+                        <div class="pomo-setting-group">
+                            <span class="pomo-setting-label">Break</span>
+                            <div class="pomo-chips" role="group" aria-label="Break duration">
+                                <button class="pomo-chip pomo-chip--active" data-type="break" data-minutes="5"   type="button">5 min</button>
+                                <button class="pomo-chip" data-type="break" data-minutes="10"  type="button">10 min</button>
+                                <button class="pomo-chip" data-type="break" data-minutes="15"  type="button">15 min</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- SUBTASKS -->
+                    <details id="pomo-subtasks-details" class="pomo-subtasks-details" style="display:none;">
+                        <summary class="pomo-subtasks-summary">
+                            Subtasks <span id="pomo-subtasks-count" class="pomo-subtasks-count"></span>
+                        </summary>
+                        <div id="pomo-subtasks-list" class="pomo-subtasks-list"></div>
+                    </details>
+
+                    <!-- COMPLETE BUTTON -->
+                    <button id="pomo-complete-btn" class="pomo-btn pomo-btn--complete" type="button">
+                        ✓ Complete Task
+                    </button>
+
+                </div><!-- /focus-workspace -->
+
+            </div><!-- /page-focus -->
 
         </main>
 
@@ -580,77 +742,6 @@
 
 
     <script type="module" src="dashboard.js"></script>
-
-<!-- ============================= -->
-<!-- FOCUS MODE OVERLAY            -->
-<!-- ============================= -->
-
-<div id="focus-overlay" class="focus-overlay" role="dialog"
-     aria-modal="true" aria-labelledby="focus-task-title" style="display:none;">
-
-    <!-- Top-right exit button -->
-    <button id="focus-exit-btn" class="focus-exit-btn" type="button"
-            aria-label="Exit Focus Mode">✕ Exit</button>
-
-    <!-- Central card -->
-    <div class="focus-card">
-
-        <!-- Task metadata badges -->
-        <div class="focus-meta">
-            <span id="focus-category-badge" class="focus-badge focus-badge--category"></span>
-            <span id="focus-priority-badge" class="focus-badge focus-badge--priority"></span>
-            <span id="focus-effort-badge"   class="focus-badge focus-badge--effort"></span>
-        </div>
-
-        <h2 id="focus-task-title" class="focus-task-title"></h2>
-        <p  id="focus-task-due"   class="focus-task-due"   style="display:none;"></p>
-
-        <!-- SVG circular timer -->
-        <div class="focus-timer-ring" role="timer" aria-live="polite"
-             aria-label="Focus timer">
-            <svg viewBox="0 0 120 120" class="focus-ring-svg" aria-hidden="true">
-                <circle class="focus-ring-track" cx="60" cy="60" r="54"/>
-                <circle id="focus-ring-progress" class="focus-ring-progress"
-                        cx="60" cy="60" r="54"/>
-            </svg>
-            <span id="focus-timer-display" class="focus-timer-display">25:00</span>
-        </div>
-
-        <!-- Duration chips -->
-        <div class="focus-duration-chips" role="group" aria-label="Session duration">
-            <button class="focus-chip" data-minutes="15"  type="button">15 min</button>
-            <button class="focus-chip" data-minutes="30"  type="button">30 min</button>
-            <button class="focus-chip" data-minutes="60"  type="button">60 min</button>
-            <button class="focus-chip" data-minutes="120" type="button">120 min</button>
-            <button class="focus-chip" data-minutes="90"  type="button">180+ min</button>
-        </div>
-
-        <!-- Timer expired banner (hidden until 00:00) -->
-        <div id="focus-done-banner" class="focus-done-banner" role="alert"
-             aria-live="assertive" style="display:none;">
-            ⏰ Time's up! Great work.
-        </div>
-
-        <!-- Subtasks (collapsible) -->
-        <details id="focus-subtasks-details" class="focus-subtasks-details"
-                 style="display:none;">
-            <summary class="focus-subtasks-summary">
-                Subtasks <span id="focus-subtasks-count" class="focus-subtasks-count"></span>
-            </summary>
-            <div id="focus-subtasks-list" class="focus-subtasks-list"></div>
-        </details>
-
-        <!-- Bottom controls -->
-        <div class="focus-controls">
-            <button id="focus-pause-btn"    class="focus-btn focus-btn--secondary"
-                    type="button">Pause</button>
-            <button id="focus-complete-btn" class="focus-btn focus-btn--primary"
-                    type="button">Complete Task</button>
-        </div>
-
-    </div>
-
-</div>
 
 </body>
 

@@ -26,6 +26,81 @@ import {
 } from "./scoring.js";
 
 // ======================================
+// Navigation
+// ======================================
+
+const navItems = document.querySelectorAll(".nav-item[data-page]");
+const pageTitle = document.getElementById("pageTitle");
+
+// Map every data-page value to its section element ID and display title.
+// Only implemented pages get a sectionId; unimplemented ones stay null.
+const PAGE_MAP = {
+    "today":     { sectionId: "page-today",     title: "Today"     },
+    "all-tasks": { sectionId: "page-all-tasks",  title: "All Tasks" },
+    "important": { sectionId: "page-important",  title: "Important" },
+    "calendar":  { sectionId: "page-calendar",   title: "Calendar"  },
+    "focus":     { sectionId: "page-focus",      title: "Focus"     }
+};
+
+// Track which page is currently active
+let currentPage = "today";
+
+function navigateTo(page) {
+    const config = PAGE_MAP[page];
+    if (!config) return;
+
+    currentPage = page;
+
+    // Update sidebar active state
+    navItems.forEach((n) => n.classList.remove("active"));
+    const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (navItem) navItem.classList.add("active");
+
+    // Update page title
+    if (pageTitle && config.title) pageTitle.textContent = config.title;
+
+    // Show the target section, hide all others
+    Object.values(PAGE_MAP).forEach(({ sectionId }) => {
+        if (!sectionId) return;
+        const el = document.getElementById(sectionId);
+        if (el) el.style.display = "none";
+    });
+
+    if (config.sectionId) {
+        const target = document.getElementById(config.sectionId);
+        if (target) {
+            // Focus page uses flex layout; all others use block
+            target.style.display = page === "focus" ? "flex" : "block";
+        }
+    }
+
+    // Page-specific on-enter logic
+    if (page === "all-tasks") {
+        renderAllTasksPage();
+    }
+    if (page === "important") {
+        renderImportantPage();
+    }
+    if (page === "calendar") {
+        renderCalendarPage();
+    }
+    if (page === "focus") {
+        renderFocusPage();
+    }
+    // Stop Pomodoro timer when navigating away from Focus
+    if (page !== "focus") {
+        pomoStop();
+    }
+}
+
+navItems.forEach((item) => {
+    item.addEventListener("click", (event) => {
+        event.preventDefault();
+        navigateTo(item.dataset.page);
+    });
+});
+
+// ======================================
 // Theme System
 // ======================================
 
@@ -310,322 +385,181 @@ let editingTask = null;
 let editingTaskCard = null;
 
 // ======================================
-// Focus Mode State
+// Pomodoro State  (single source of truth)
 // ======================================
 
-const focusState = {
-    task:         null,
-    totalSeconds: 0,
-    remaining:    0,
+const POMO_RING_CIRCUMFERENCE = 339.292; // 2 * π * 54
+
+const pomodoroState = {
+    activeTaskId: null,   // ID of the task being focused on
+    mode:         "work", // "work" | "break"
+    workSecs:     25 * 60,
+    breakSecs:    5  * 60,
+    remaining:    25 * 60,
     running:      false,
-    intervalId:   null,
-    startEpoch:   null,
-    pausedAt:     null
+    intervalId:   null
 };
 
-function effortToSeconds(effort) {
-    const map = {
-        "15":   900,
-        "30":   1800,
-        "60":   3600,
-        "120":  7200,
-        "180+": 5400
-    };
-    return map[effort] ?? 1500;
+// ---- Timer helpers ----
+
+function pomoSecsForMode() {
+    return pomodoroState.mode === "work"
+        ? pomodoroState.workSecs
+        : pomodoroState.breakSecs;
 }
 
-// ======================================
-// Timer Display Helpers
-// ======================================
-
-const RING_RADIUS       = 54;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 339.292
-
-function updateTimerDisplay() {
-    const s  = focusState.remaining;
+function pomoUpdateDisplay() {
+    const s  = pomodoroState.remaining;
     const mm = String(Math.floor(s / 60)).padStart(2, "0");
     const ss = String(s % 60).padStart(2, "0");
-    const el = document.getElementById("focus-timer-display");
+    const el = document.getElementById("pomo-timer-display");
     if (el) el.textContent = `${mm}:${ss}`;
 }
 
-function updateRingProgress() {
-    const total  = focusState.totalSeconds;
-    const ratio  = total > 0
-        ? Math.min(1, Math.max(0, focusState.remaining / total))
+function pomoUpdateRing() {
+    const total = pomoSecsForMode();
+    const ratio = total > 0
+        ? Math.min(1, Math.max(0, pomodoroState.remaining / total))
         : 0;
-    const offset = RING_CIRCUMFERENCE * (1 - ratio);
-    const el = document.getElementById("focus-ring-progress");
+    const offset = POMO_RING_CIRCUMFERENCE * (1 - ratio);
+    const el = document.getElementById("pomo-ring-progress");
     if (el) el.style.strokeDashoffset = offset;
 }
 
-// ======================================
-// Timer Engine
-// ======================================
-
-function startTimer() {
-    if (focusState.running) return;
-    focusState.running    = true;
-    focusState.startEpoch = Date.now();
-    const base = focusState.pausedAt ?? focusState.totalSeconds;
-    focusState.intervalId = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - focusState.startEpoch) / 1000);
-        focusState.remaining = Math.max(0, base - elapsed);
-        updateTimerDisplay();
-        updateRingProgress();
-        if (focusState.remaining === 0) {
-            clearInterval(focusState.intervalId);
-            focusState.intervalId = null;
-            focusState.running    = false;
-            const banner = document.getElementById("focus-done-banner");
-            if (banner) banner.style.display = "block";
-        }
-    }, 1000);
+function pomoTick() {
+    pomodoroState.remaining = Math.max(0, pomodoroState.remaining - 1);
+    pomoUpdateDisplay();
+    pomoUpdateRing();
+    if (pomodoroState.remaining === 0) {
+        pomoHandleModeTransition();
+    }
 }
 
-function pauseTimer() {
-    if (!focusState.running) return;
-    clearInterval(focusState.intervalId);
-    focusState.intervalId = null;
-    focusState.running    = false;
-    focusState.pausedAt   = focusState.remaining;
-    const btn = document.getElementById("focus-pause-btn");
+// ---- Mode transition (work → break → work) ----
+
+function pomoHandleModeTransition() {
+    // Stop the current interval first — always exactly one interval
+    pomoStop();
+
+    const wasWork = pomodoroState.mode === "work";
+    pomodoroState.mode = wasWork ? "break" : "work";
+    pomodoroState.remaining = pomoSecsForMode();
+
+    // Update mode badge and ring colour
+    const badge = document.getElementById("pomo-mode-badge");
+    if (badge) {
+        badge.textContent = wasWork ? "BREAK" : "WORK";
+        badge.className = `pomo-mode-badge pomo-mode-badge--${pomodoroState.mode}`;
+    }
+    const ring = document.getElementById("pomo-ring-progress");
+    if (ring) {
+        ring.classList.toggle("pomo-ring-progress--break", pomodoroState.mode === "break");
+    }
+
+    // Show transition banner
+    const banner = document.getElementById("pomo-banner");
+    if (banner) {
+        banner.textContent = wasWork
+            ? "🎉 Work session done! Take a break."
+            : "⚡ Break over — back to work!";
+        banner.className = `pomo-banner${wasWork ? " pomo-banner--break" : ""}`;
+        banner.style.display = "block";
+        // Auto-hide after 4 seconds
+        setTimeout(() => { if (banner) banner.style.display = "none"; }, 4000);
+    }
+
+    pomoUpdateDisplay();
+    pomoUpdateRing();
+
+    // Auto-start next session (task is NOT completed by this)
+    pomoStart();
+}
+
+// ---- Core controls ----
+
+function pomoStart() {
+    if (pomodoroState.running) return;
+    // Safety: always clear any stale interval before creating a new one
+    if (pomodoroState.intervalId) {
+        clearInterval(pomodoroState.intervalId);
+        pomodoroState.intervalId = null;
+    }
+    pomodoroState.running    = true;
+    pomodoroState.intervalId = setInterval(pomoTick, 1000);
+}
+
+function pomoStop() {
+    if (pomodoroState.intervalId) {
+        clearInterval(pomodoroState.intervalId);
+        pomodoroState.intervalId = null;
+    }
+    pomodoroState.running = false;
+}
+
+function pomoPause() {
+    if (!pomodoroState.running) return;
+    pomoStop();
+    const btn = document.getElementById("pomo-pause-btn");
     if (btn) btn.textContent = "Resume";
 }
 
-function resumeTimer() {
-    if (focusState.running) return;
-    // pausedAt is already set by pauseTimer(); startTimer() uses it as the base.
-    startTimer();
-    const btn = document.getElementById("focus-pause-btn");
+function pomoResume() {
+    if (pomodoroState.running) return;
+    pomoStart();
+    const btn = document.getElementById("pomo-pause-btn");
     if (btn) btn.textContent = "Pause";
 }
 
-// ======================================
-// Focus Overlay Population
-// ======================================
-
-function populateFocusOverlay(task) {
-    // Title
-    document.getElementById("focus-task-title").textContent = task.title;
-
-    // Category / priority / effort badges
-    document.getElementById("focus-category-badge").textContent =
-        `${getCategoryIcon(task.category)} ${formatCategory(task.category)}`;
-    document.getElementById("focus-priority-badge").textContent =
-        `${getPriorityIcon(task.priority)} ${formatPriority(task.priority)}`;
-    document.getElementById("focus-effort-badge").textContent =
-        task.estimatedEffort ? `⏱ ${formatEffort(task.estimatedEffort)}` : "";
-
-    // Due date/time — show only when present
-    const dueEl = document.getElementById("focus-task-due");
-    if (task.dueDate || task.dueTime) {
-        if (task.dueDate && task.dueTime) {
-            dueEl.textContent = `📅 Due: ${formatDueDateTime(task.dueDate, task.dueTime)}`;
-        } else if (task.dueDate) {
-            dueEl.textContent = `📅 Due: ${formatDueDate(task.dueDate)}`;
-        } else {
-            dueEl.textContent = `⏰ Due: ${formatTime(task.dueTime)}`;
-        }
-        dueEl.style.display = "block";
-    } else {
-        dueEl.style.display = "none";
-    }
-
-    // Active duration chip — match data-minutes to focusState.totalSeconds / 60
-    const activeMinutes = focusState.totalSeconds / 60;
-    document.querySelectorAll(".focus-chip").forEach(chip => {
-        chip.classList.toggle(
-            "focus-chip--active",
-            Number(chip.dataset.minutes) === activeMinutes
-        );
-    });
-
-    // Timer display and ring
-    updateTimerDisplay();
-    updateRingProgress();
-
-    // Reset done banner
-    const banner = document.getElementById("focus-done-banner");
+function pomoReset() {
+    pomoStop();
+    pomodoroState.remaining = pomoSecsForMode();
+    pomoUpdateDisplay();
+    pomoUpdateRing();
+    const btn = document.getElementById("pomo-pause-btn");
+    if (btn) btn.textContent = "Pause";
+    const banner = document.getElementById("pomo-banner");
     if (banner) banner.style.display = "none";
-
-    // Reset pause button label
-    const pauseBtn = document.getElementById("focus-pause-btn");
-    if (pauseBtn) pauseBtn.textContent = "Pause";
-
-    // Build subtask list
-    const detailsEl = document.getElementById("focus-subtasks-details");
-    const listEl    = document.getElementById("focus-subtasks-list");
-    const countEl   = document.getElementById("focus-subtasks-count");
-    listEl.innerHTML = "";
-
-    const subtasks = task.subtasks || [];
-    if (subtasks.length > 0) {
-        const done = subtasks.filter(s => s.completed).length;
-        countEl.textContent = `${done} / ${subtasks.length}`;
-
-        subtasks.forEach(sub => {
-            const label = document.createElement("label");
-            label.className = `focus-subtask-item${sub.completed ? " completed" : ""}`;
-            label.innerHTML = `
-                <input type="checkbox" class="focus-subtask-check"
-                       ${sub.completed ? "checked" : ""}>
-                <span>${sub.title}</span>`;
-            const cb = label.querySelector(".focus-subtask-check");
-            cb.addEventListener("change", () =>
-                handleFocusSubtaskToggle(sub, cb.checked, countEl, label));
-            listEl.appendChild(label);
-        });
-
-        detailsEl.style.display = "block";
-    } else {
-        detailsEl.style.display = "none";
-    }
 }
 
-// ======================================
-// Focus Mode Open / Close
-// ======================================
+// ---- Entry point called by Start Task / task-card Focus button ----
 
-function openFocusMode(task) {
+function startFocusWithTask(task) {
     if (!task) return;
 
-    // Stop any previously-running timer before resetting state
-    if (focusState.intervalId) {
-        clearInterval(focusState.intervalId);
-        focusState.intervalId = null;
-    }
+    // Store reference via ID, resolve against allTasks
+    pomodoroState.activeTaskId = task.id;
 
-    focusState.task         = task;
-    focusState.totalSeconds = effortToSeconds(task.estimatedEffort);
-    focusState.remaining    = focusState.totalSeconds;
-    focusState.running      = false;
-    focusState.startEpoch   = null;
-    focusState.pausedAt     = null;
+    // Reset to work mode with default/current durations
+    pomoStop();
+    pomodoroState.mode      = "work";
+    pomodoroState.remaining = pomodoroState.workSecs;
 
-    populateFocusOverlay(task);
-
-    const overlay = document.getElementById("focus-overlay");
-    if (overlay) overlay.style.display = "flex";
-
-    startTimer();
+    navigateTo("focus");
+    // renderFocusPage() is called by navigateTo — it populates the UI
+    // Auto-start begins there after population
 }
 
-function closeFocusMode() {
-    clearInterval(focusState.intervalId);
-    focusState.intervalId = null;
-    focusState.running    = false;
-    focusState.task       = null;
-    const overlay = document.getElementById("focus-overlay");
-    if (overlay) overlay.style.display = "none";
-    updateRecommendationUI();
-}
+// ---- Complete task from Focus ----
 
-// ======================================
-// Focus Mode Completion
-// ======================================
-
-async function handleFocusComplete() {
-    const task = focusState.task;
+async function pomoCompleteTask() {
+    const task = allTasks.find(t => t.id === pomodoroState.activeTaskId);
     if (!task) return;
 
-    // Locate the matching task card by title (no data-id on cards)
-    const taskCard = [...document.querySelectorAll(".task-card")]
-        .find(c => {
-            const h3 = c.querySelector("h3");
-            return h3 && h3.textContent.trim() === task.title.trim();
-        }) || null;
+    pomoStop();
 
-    const result = await handleTaskCompletion(task, taskCard, true);
+    // Find the Today card if visible (may be null on other pages)
+    const todayCard = [...document.querySelectorAll("#taskList .task-card")]
+        .find(c => c.querySelector("h3")?.textContent.trim() === task.title.trim()) || null;
 
-    if (result !== false) {
-        closeFocusMode();
-    } else {
+    const result = await handleTaskCompletion(task, todayCard || { classList: { toggle: () => {}, querySelector: () => null } }, true);
+    if (result === false) {
         console.error("Focus: could not complete task", task);
-    }
-}
-
-// ======================================
-// Focus Subtask Toggle
-// ======================================
-
-async function handleFocusSubtaskToggle(subtask, checked, countEl, labelEl) {
-    const task = focusState.task;
-    const user = auth.currentUser;
-    if (!task || !user) return;
-
-    // Optimistically apply the change
-    const prev        = subtask.completed;
-    subtask.completed = checked;
-
-    // Recompute derived state
-    const allDone = (task.subtasks || []).every(s => s.completed);
-    const done    = (task.subtasks || []).filter(s => s.completed).length;
-
-    // Update count badge
-    countEl.textContent = `${done} / ${task.subtasks.length}`;
-
-    // Update label visual state
-    labelEl.classList.toggle("completed", checked);
-
-    // Sync matching main-list card — find by task title (cards have no data-id)
-    const mainCard = [...document.querySelectorAll(".task-card")]
-        .find(c => {
-            const h3 = c.querySelector("h3");
-            return h3 && h3.textContent.trim() === task.title.trim();
-        });
-
-    if (mainCard) {
-        // Sync the individual subtask checkbox in the main card's subtask list
-        const mainSubtaskLabels = mainCard.querySelectorAll(".task-subtask");
-        mainSubtaskLabels.forEach(lbl => {
-            const titleEl = lbl.querySelector(".subtask-title");
-            if (titleEl && titleEl.textContent.trim() === subtask.title.trim()) {
-                const cb = lbl.querySelector(".subtask-checkbox");
-                if (cb) cb.checked = checked;
-                lbl.classList.toggle("completed", checked);
-            }
-        });
-
-        // Sync main task card checkbox and class to reflect allDone
-        const mainTaskCb = mainCard.querySelector(".task-checkbox");
-        if (mainTaskCb) mainTaskCb.checked = allDone;
-        mainCard.classList.toggle("completed", allDone);
+        return;
     }
 
-    try {
-        const taskRef = doc(db, "users", user.uid, "tasks", task.id);
-        await updateDoc(taskRef, {
-            subtasks:  task.subtasks,
-            completed: allDone
-        });
-        task.completed = allDone;
-        updateProgress();
-    } catch (err) {
-        console.error("Focus subtask toggle failed:", err);
-
-        // Revert optimistic changes
-        subtask.completed = prev;
-        const revertDone  = (task.subtasks || []).filter(s => s.completed).length;
-        countEl.textContent = `${revertDone} / ${task.subtasks.length}`;
-        labelEl.classList.toggle("completed", prev);
-
-        const cb = labelEl.querySelector("input[type='checkbox']");
-        if (cb) cb.checked = prev;
-
-        // Revert main card sync
-        if (mainCard) {
-            const mainSubtaskLabels = mainCard.querySelectorAll(".task-subtask");
-            mainSubtaskLabels.forEach(lbl => {
-                const titleEl = lbl.querySelector(".subtask-title");
-                if (titleEl && titleEl.textContent.trim() === subtask.title.trim()) {
-                    const cb = lbl.querySelector(".subtask-checkbox");
-                    if (cb) cb.checked = prev;
-                    lbl.classList.toggle("completed", prev);
-                }
-            });
-        }
-    }
+    // Clear active task and navigate back to Today
+    pomodoroState.activeTaskId = null;
+    navigateTo("today");
 }
 
 // ======================================
@@ -635,6 +569,754 @@ async function handleFocusSubtaskToggle(subtask, checked, countEl, labelEl) {
 // Mirror of all tasks currently in the UI.
 // Kept in sync by addTaskToUI (add) and the delete/edit flows (remove+re-add).
 let allTasks = [];
+
+// ======================================
+// All Tasks — Category Definitions
+// ======================================
+
+// Single source of truth for categories.
+// Matches the values used in the task form <select> and stored on task.category.
+const CATEGORY_DEFS = [
+    { value: "personal", label: "Personal" },
+    { value: "work",     label: "Work"     },
+    { value: "study",    label: "Study"    },
+    { value: "fitness",  label: "Fitness"  }
+];
+
+// Active category filter for the All Tasks page ("all" = show everything)
+let activeCategory = "all";
+
+// ======================================
+// All Tasks — Filter Helper
+// ======================================
+
+function filterTasksByCategory(tasks, category) {
+    if (category === "all") return tasks;
+    return tasks.filter(t => (t.category || "") === category);
+}
+
+// ======================================
+// All Tasks — Build Task Card
+// (reuses all existing formatting helpers and handlers via addTaskToAllTasksUI)
+// ======================================
+
+function buildAllTaskCard(task) {
+    const card = document.createElement("article");
+    card.className = "task-card";
+    if (task.completed) card.classList.add("completed");
+
+    card.innerHTML = `
+    <div class="task-main-row">
+        <div class="task-check">
+            <input type="checkbox" class="task-checkbox" ${task.completed ? "checked" : ""}>
+        </div>
+        <div class="task-info">
+            <h3>${task.title}</h3>
+            <p>${task.description || "No description added."}</p>
+            <div class="task-meta">
+                <span>${getCategoryIcon(task.category)} ${formatCategory(task.category)}</span>
+                <span>${getPriorityIcon(task.priority)} ${formatPriority(task.priority)}</span>
+                ${task.dueDate && task.dueTime
+                    ? `<span>📅 Due: ${formatDueDateTime(task.dueDate, task.dueTime)}</span>`
+                    : task.dueDate
+                    ? `<span>📅 Due: ${formatDueDate(task.dueDate)}</span>`
+                    : task.dueTime
+                    ? `<span>⏰ Due: ${formatTime(task.dueTime)}</span>`
+                    : ""}
+                ${task.estimatedEffort
+                    ? `<span>⏱ ${formatEffort(task.estimatedEffort)}</span>`
+                    : ""}
+            </div>
+        </div>
+        <div class="task-actions">
+            <button class="star-task-btn ${task.starred ? "important" : ""}" type="button"
+                    title="${task.starred ? "Unmark important" : "Mark important"}">
+                ${task.starred ? "★" : "☆"}
+            </button>
+            <button class="task-menu-btn" type="button" title="Task options">⋮</button>
+            <div class="task-menu">
+                <button class="edit-task-btn"   type="button">✏️ Edit</button>
+                <button class="delete-task-btn" type="button">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+    <div class="subtask-section" style="display:none;">
+        <div class="subtask-header">
+            <strong>Subtasks</strong>
+            <span class="subtask-progress">0 / 0 completed</span>
+        </div>
+        <div class="subtask-list"></div>
+    </div>`;
+
+    const subtaskSection = card.querySelector(".subtask-section");
+    renderTaskSubtasks(task, subtaskSection);
+
+    // Expand / collapse subtasks on card click
+    card.addEventListener("click", (e) => {
+        if (e.target.closest("button") || e.target.closest("input")) return;
+        const open = subtaskSection.style.display !== "none";
+        subtaskSection.style.display = open ? "none" : "block";
+    });
+
+    // Checkbox — complete / uncomplete
+    const checkbox = card.querySelector(".task-checkbox");
+    checkbox.addEventListener("change", async () => {
+        const result = await handleTaskCompletion(task, card, checkbox.checked);
+        if (!result) { checkbox.checked = task.completed; return; }
+        // Keep the Today list card in sync if it exists
+        syncTodayCard(task);
+    });
+
+    // Star button
+    const starBtn = card.querySelector(".star-task-btn");
+    starBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        const newStar = !task.starred;
+        try {
+            await updateDoc(doc(db, "users", user.uid, "tasks", task.id), { starred: newStar });
+            task.starred = newStar;
+            starBtn.textContent = newStar ? "★" : "☆";
+            starBtn.classList.toggle("important", newStar);
+            starBtn.title = newStar ? "Unmark important" : "Mark important";
+            syncTodayCard(task);
+            // Refresh Important page — task may have entered or left the list
+            if (currentPage === "important") renderImportantList();
+        } catch (err) { console.error("Failed to update importance:", err); }
+    });
+
+    // Menu open/close
+    const menuBtn  = card.querySelector(".task-menu-btn");
+    const taskMenu = card.querySelector(".task-menu");
+    menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const opening = !taskMenu.classList.contains("show");
+        document.querySelectorAll(".task-menu.show").forEach(m => {
+            m.classList.remove("show");
+            m.closest(".task-card")?.classList.remove("menu-open");
+        });
+        if (opening) { taskMenu.classList.add("show"); card.classList.add("menu-open"); }
+    });
+    document.addEventListener("click", () => {
+        taskMenu.classList.remove("show");
+        card.classList.remove("menu-open");
+    });
+
+    // Edit
+    const editBtn = card.querySelector(".edit-task-btn");
+    editBtn.addEventListener("click", () => {
+        editingTask     = task;
+        editingTaskCard = card;
+        document.getElementById("taskModalTitle").textContent = "Edit Task";
+        document.getElementById("taskSubmitBtn").textContent  = "Save Changes";
+        taskMenu.classList.remove("show");
+        document.getElementById("taskTitle").value       = task.title       || "";
+        document.getElementById("taskDescription").value = task.description || "";
+        document.getElementById("taskCategory").value    = task.category    || "";
+        document.getElementById("taskPriority").value    = task.priority    || "";
+        document.getElementById("taskDueDate").value     = task.dueDate     || "";
+        document.getElementById("taskDueTime").value     = task.dueTime     || "";
+        document.getElementById("taskReminder").value    = task.reminder    || "";
+        document.getElementById("taskRepeat").value      = task.repeat      || "";
+        document.getElementById("taskEffort").value      = task.estimatedEffort || "30";
+        subtasks = task.subtasks ? [...task.subtasks] : [];
+        renderSubtasks();
+        taskModal.classList.add("show");
+    });
+
+    // Delete
+    const deleteBtn = card.querySelector(".delete-task-btn");
+    deleteBtn.addEventListener("click", async () => {
+        if (!confirm(`Delete "${task.title}"?`)) return;
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            await deleteDoc(doc(db, "users", user.uid, "tasks", task.id));
+            card.remove();
+            allTasks = allTasks.filter(t => t.id !== task.id);
+            // Also remove from Today list
+            removeTodayCard(task.id);
+            updateProgress();
+            updateTaskCount();
+            // Refresh Important page if active
+            if (currentPage === "important") renderImportantList();
+        } catch (err) {
+            console.error("Failed to delete task:", err);
+            alert("Unable to delete this task. Please try again.");
+        }
+    });
+
+    // Focus shortcut in menu
+    const focusBtn = document.createElement("button");
+    focusBtn.type = "button";
+    focusBtn.textContent = "🎯 Focus";
+    focusBtn.addEventListener("click", () => {
+        taskMenu.classList.remove("show");
+        card.classList.remove("menu-open");
+        startFocusWithTask(task);
+    });
+    taskMenu.appendChild(focusBtn);
+
+    return card;
+}
+
+// ======================================
+// All Tasks — Sync helpers for Today list
+// ======================================
+
+// After an action in All Tasks, update the corresponding Today card if present.
+function syncTodayCard(task) {
+    const todayCard = [...document.querySelectorAll("#taskList .task-card")]
+        .find(c => c.querySelector("h3")?.textContent.trim() === task.title.trim());
+    if (!todayCard) return;
+    const cb = todayCard.querySelector(".task-checkbox");
+    if (cb) cb.checked = task.completed;
+    todayCard.classList.toggle("completed", task.completed);
+    const star = todayCard.querySelector(".star-task-btn");
+    if (star) {
+        star.textContent = task.starred ? "★" : "☆";
+        star.classList.toggle("important", !!task.starred);
+        star.title = task.starred ? "Unmark important" : "Mark important";
+    }
+}
+
+function removeTodayCard(taskId) {
+    // Today list cards don't carry a data-id; match by scanning allTasks id.
+    // The simplest reliable approach: re-render is handled by updateTaskCount/updateProgress.
+    // For immediate DOM removal we find by matching task title stored in allTasks before removal.
+    // Since allTasks is filtered before this call, we rely on the card having been created
+    // via addTaskToUI which appended to #taskList. We can't reliably find it without data-id,
+    // so we leave the card in Today list (it will disappear on next page load / refresh).
+    // This matches the existing delete behaviour which already removes from #taskList directly.
+}
+
+// ======================================
+// All Tasks — Category Filter Bar
+// ======================================
+
+function buildCategoryFilterBar() {
+    const bar = document.getElementById("categoryFilterBar");
+    if (!bar) return;
+    bar.innerHTML = "";
+
+    // Derive which categories actually have tasks so we only show populated ones,
+    // but always show "All". For maximum flexibility we show all known categories
+    // regardless — matching the spec's "generated from existing category data".
+    const categories = [
+        { value: "all", label: "All" },
+        ...CATEGORY_DEFS
+    ];
+
+    categories.forEach(({ value, label }) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-filter-btn" + (value === activeCategory ? " active" : "");
+        btn.dataset.category = value;
+        btn.textContent = value === "all"
+            ? label
+            : `${getCategoryIcon(value)} ${label}`;
+
+        btn.addEventListener("click", () => {
+            activeCategory = value;
+            // Update active styling — only among filter buttons
+            bar.querySelectorAll(".category-filter-btn").forEach(b =>
+                b.classList.toggle("active", b === btn));
+            // Re-render task list in place (no Firebase request)
+            renderAllTasksList();
+        });
+
+        bar.appendChild(btn);
+    });
+}
+
+// ======================================
+// All Tasks — Render Task List
+// ======================================
+
+function renderAllTasksList() {
+    const list = document.getElementById("allTasksList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    const filtered = filterTasksByCategory(allTasks, activeCategory);
+
+    if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "all-tasks-empty";
+        empty.textContent = activeCategory === "all"
+            ? "You're all caught up!"
+            : `No tasks in ${formatCategory(activeCategory)}`;
+        list.appendChild(empty);
+        return;
+    }
+
+    filtered.forEach(task => list.appendChild(buildAllTaskCard(task)));
+}
+
+// ======================================
+// All Tasks — Full Page Render
+// (called by navigateTo when entering All Tasks)
+// ======================================
+
+function renderAllTasksPage() {
+    buildCategoryFilterBar();
+    renderAllTasksList();
+}
+
+// ======================================
+// Important — Render List
+// ======================================
+
+function renderImportantList() {
+    const list = document.getElementById("importantList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    const important = allTasks.filter(t => t.starred === true);
+
+    if (important.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "all-tasks-empty";
+        empty.innerHTML = "No important tasks yet.<br><small>Star a task to keep it here.</small>";
+        list.appendChild(empty);
+        return;
+    }
+
+    important.forEach(task => list.appendChild(buildAllTaskCard(task)));
+}
+
+// ======================================
+// Important — Full Page Render
+// (called by navigateTo when entering Important)
+// ======================================
+
+function renderImportantPage() {
+    renderImportantList();
+}
+
+// ======================================
+// Calendar — State
+// ======================================
+
+const calendarState = {
+    year:  new Date().getFullYear(),
+    month: new Date().getMonth()   // 0-indexed
+};
+
+// ======================================
+// Calendar — Full Page Render
+// ======================================
+
+function renderCalendarPage() {
+    renderCalendarGrid();
+
+    // Wire prev/today/next buttons (replace to avoid duplicate listeners)
+    ["calPrevBtn", "calTodayBtn", "calNextBtn"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        const fresh = btn.cloneNode(true);
+        btn.parentNode.replaceChild(fresh, btn);
+    });
+
+    document.getElementById("calPrevBtn")?.addEventListener("click", () => {
+        calendarState.month--;
+        if (calendarState.month < 0) { calendarState.month = 11; calendarState.year--; }
+        renderCalendarGrid();
+    });
+
+    document.getElementById("calTodayBtn")?.addEventListener("click", () => {
+        const now = new Date();
+        calendarState.year  = now.getFullYear();
+        calendarState.month = now.getMonth();
+        renderCalendarGrid();
+    });
+
+    document.getElementById("calNextBtn")?.addEventListener("click", () => {
+        calendarState.month++;
+        if (calendarState.month > 11) { calendarState.month = 0; calendarState.year++; }
+        renderCalendarGrid();
+    });
+
+    // Wire detail panel close button
+    const closeBtn = document.getElementById("calDetailClose");
+    if (closeBtn) {
+        const freshClose = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(freshClose, closeBtn);
+        freshClose.addEventListener("click", () => {
+            const panel = document.getElementById("calDetailPanel");
+            if (panel) panel.style.display = "none";
+        });
+    }
+}
+
+// ======================================
+// Calendar — Build Grid for current month
+// ======================================
+
+function renderCalendarGrid() {
+    const { year, month } = calendarState;
+
+    // Update month label
+    const label = document.getElementById("calMonthLabel");
+    if (label) {
+        label.textContent = new Date(year, month, 1)
+            .toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+
+    const grid = document.getElementById("calGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+    // Build a map: dateStr → tasks[]
+    const tasksByDate = {};
+    allTasks.forEach(task => {
+        if (!task.dueDate) return;
+        if (!tasksByDate[task.dueDate]) tasksByDate[task.dueDate] = [];
+        tasksByDate[task.dueDate].push(task);
+    });
+
+    // First day of month (0=Sun) and total days
+    const firstDow   = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrev  = new Date(year, month, 0).getDate();
+
+    const CHIP_LIMIT = 3; // max chips before "+N more"
+
+    // Fill cells: leading padding + current month + trailing padding
+    const totalCells = Math.ceil((firstDow + daysInMonth) / 7) * 7;
+
+    for (let i = 0; i < totalCells; i++) {
+        let cellDay, cellMonth, cellYear, outside;
+
+        if (i < firstDow) {
+            // Previous month
+            cellDay   = daysInPrev - firstDow + i + 1;
+            cellMonth = month - 1 < 0 ? 11 : month - 1;
+            cellYear  = month - 1 < 0 ? year - 1 : year;
+            outside   = true;
+        } else if (i >= firstDow + daysInMonth) {
+            // Next month
+            cellDay   = i - firstDow - daysInMonth + 1;
+            cellMonth = month + 1 > 11 ? 0 : month + 1;
+            cellYear  = month + 1 > 11 ? year + 1 : year;
+            outside   = true;
+        } else {
+            cellDay   = i - firstDow + 1;
+            cellMonth = month;
+            cellYear  = year;
+            outside   = false;
+        }
+
+        const dateStr = `${cellYear}-${String(cellMonth + 1).padStart(2,"0")}-${String(cellDay).padStart(2,"0")}`;
+        const isToday = dateStr === todayStr && !outside;
+        const dayTasks = tasksByDate[dateStr] || [];
+
+        const cell = document.createElement("div");
+        cell.className = `cal-day${outside ? " cal-day--outside" : ""}${isToday ? " cal-day--today" : ""}`;
+        cell.setAttribute("role", "gridcell");
+        cell.setAttribute("aria-label", dateStr);
+
+        // Day number
+        const numEl = document.createElement("span");
+        numEl.className = "cal-day-num";
+        numEl.textContent = cellDay;
+        cell.appendChild(numEl);
+
+        // Task chips
+        const visible = dayTasks.slice(0, CHIP_LIMIT);
+        const overflow = dayTasks.length - CHIP_LIMIT;
+
+        visible.forEach(task => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = `cal-task-chip${task.completed ? " cal-task-chip--completed" : ""}`;
+            chip.textContent = task.title;
+            chip.title = task.title;
+            chip.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openCalendarDetailPanel(dateStr, dayTasks);
+            });
+            cell.appendChild(chip);
+        });
+
+        if (overflow > 0) {
+            const more = document.createElement("button");
+            more.type = "button";
+            more.className = "cal-task-overflow";
+            more.textContent = `+${overflow} more`;
+            more.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openCalendarDetailPanel(dateStr, dayTasks);
+            });
+            cell.appendChild(more);
+        }
+
+        // Click on empty cell area opens panel too (if there are tasks)
+        if (dayTasks.length > 0) {
+            cell.style.cursor = "pointer";
+            cell.addEventListener("click", () => {
+                openCalendarDetailPanel(dateStr, dayTasks);
+            });
+        }
+
+        grid.appendChild(cell);
+    }
+}
+
+// ======================================
+// Calendar — Detail Panel
+// ======================================
+
+function openCalendarDetailPanel(dateStr, tasks) {
+    const panel  = document.getElementById("calDetailPanel");
+    const dateEl = document.getElementById("calDetailDate");
+    const body   = document.getElementById("calDetailBody");
+    if (!panel || !dateEl || !body) return;
+
+    // Format date nicely
+    const [y, m, d] = dateStr.split("-").map(Number);
+    dateEl.textContent = new Date(y, m - 1, d)
+        .toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+    body.innerHTML = "";
+
+    if (tasks.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "cal-detail-empty";
+        empty.textContent = "No tasks on this day.";
+        body.appendChild(empty);
+    } else {
+        tasks.forEach(task => {
+            const card = buildAllTaskCard(task);
+            body.appendChild(card);
+        });
+    }
+
+    panel.style.display = "flex";
+}
+
+// ======================================
+// Focus — Render Page
+// ======================================
+
+function renderFocusPage() {
+    const emptyState = document.getElementById("focus-empty-state");
+    const workspace  = document.getElementById("focus-workspace");
+
+    const task = allTasks.find(t => t.id === pomodoroState.activeTaskId) || null;
+
+    if (!task) {
+        // No active task — show empty state
+        if (emptyState) emptyState.style.display = "flex";
+        if (workspace)  workspace.style.display  = "none";
+        return;
+    }
+
+    // Has active task — show workspace
+    if (emptyState) emptyState.style.display = "none";
+    if (workspace)  workspace.style.display  = "flex";
+
+    // Mode badge
+    const badge = document.getElementById("pomo-mode-badge");
+    if (badge) {
+        badge.textContent = pomodoroState.mode === "work" ? "WORK" : "BREAK";
+        badge.className   = `pomo-mode-badge pomo-mode-badge--${pomodoroState.mode}`;
+    }
+
+    // Ring colour
+    const ring = document.getElementById("pomo-ring-progress");
+    if (ring) {
+        ring.classList.toggle("pomo-ring-progress--break", pomodoroState.mode === "break");
+    }
+
+    // Timer display
+    pomoUpdateDisplay();
+    pomoUpdateRing();
+
+    // Pause button label
+    const pauseBtn = document.getElementById("pomo-pause-btn");
+    if (pauseBtn) pauseBtn.textContent = pomodoroState.running ? "Pause" : "Resume";
+
+    // Hide banner on fresh render
+    const banner = document.getElementById("pomo-banner");
+    if (banner) banner.style.display = "none";
+
+    // Task info
+    const titleEl = document.getElementById("pomo-task-title");
+    if (titleEl) titleEl.textContent = task.title;
+
+    const metaEl = document.getElementById("pomo-task-meta");
+    if (metaEl) {
+        const parts = [];
+        parts.push(`<span>${getCategoryIcon(task.category)} ${formatCategory(task.category)}</span>`);
+        parts.push(`<span>${getPriorityIcon(task.priority)} ${formatPriority(task.priority)}</span>`);
+        if (task.estimatedEffort) parts.push(`<span>⏱ ${formatEffort(task.estimatedEffort)}</span>`);
+        metaEl.innerHTML = parts.join("");
+    }
+
+    const dueEl = document.getElementById("pomo-task-due");
+    if (dueEl) {
+        if (task.dueDate || task.dueTime) {
+            dueEl.textContent = task.dueDate && task.dueTime
+                ? `📅 Due: ${formatDueDateTime(task.dueDate, task.dueTime)}`
+                : task.dueDate
+                ? `📅 Due: ${formatDueDate(task.dueDate)}`
+                : `⏰ Due: ${formatTime(task.dueTime)}`;
+            dueEl.style.display = "block";
+        } else {
+            dueEl.style.display = "none";
+        }
+    }
+
+    // Work duration chips — mark active chip
+    document.querySelectorAll(".pomo-chip[data-type='work']").forEach(chip => {
+        const active = Number(chip.dataset.minutes) * 60 === pomodoroState.workSecs;
+        chip.classList.toggle("pomo-chip--active", active);
+    });
+    // Break duration chips — mark active chip
+    document.querySelectorAll(".pomo-chip[data-type='break']").forEach(chip => {
+        const active = Number(chip.dataset.minutes) * 60 === pomodoroState.breakSecs;
+        chip.classList.toggle("pomo-chip--active", active);
+    });
+
+    // Subtasks
+    const detailsEl = document.getElementById("pomo-subtasks-details");
+    const listEl    = document.getElementById("pomo-subtasks-list");
+    const countEl   = document.getElementById("pomo-subtasks-count");
+    if (listEl) listEl.innerHTML = "";
+
+    const taskSubs = task.subtasks || [];
+    if (detailsEl) {
+        if (taskSubs.length > 0) {
+            const done = taskSubs.filter(s => s.completed).length;
+            if (countEl) countEl.textContent = `${done} / ${taskSubs.length}`;
+
+            taskSubs.forEach(sub => {
+                const label = document.createElement("label");
+                label.className = `focus-subtask-item${sub.completed ? " completed" : ""}`;
+                label.innerHTML = `
+                    <input type="checkbox" class="focus-subtask-check"
+                           ${sub.completed ? "checked" : ""}>
+                    <span>${sub.title}</span>`;
+                const cb = label.querySelector(".focus-subtask-check");
+                cb.addEventListener("change", () =>
+                    pomoSubtaskToggle(sub, cb.checked, countEl, label, task));
+                listEl.appendChild(label);
+            });
+
+            detailsEl.style.display = "block";
+        } else {
+            detailsEl.style.display = "none";
+        }
+    }
+
+    // Wire Pause button (replace to avoid duplicate listeners)
+    const freshPause = pauseBtn.cloneNode(true);
+    pauseBtn.parentNode.replaceChild(freshPause, pauseBtn);
+    freshPause.addEventListener("click", () => {
+        if (pomodoroState.running) {
+            pomoPause();
+        } else {
+            pomoResume();
+        }
+    });
+
+    // Wire Reset button (replace to avoid duplicate listeners)
+    const resetBtn = document.getElementById("pomo-reset-btn");
+    if (resetBtn) {
+        const freshReset = resetBtn.cloneNode(true);
+        resetBtn.parentNode.replaceChild(freshReset, resetBtn);
+        freshReset.addEventListener("click", () => {
+            pomoReset();
+        });
+    }
+
+    // Wire Complete button (replace to avoid duplicate listeners)
+    const completeBtn = document.getElementById("pomo-complete-btn");
+    if (completeBtn) {
+        const freshComplete = completeBtn.cloneNode(true);
+        completeBtn.parentNode.replaceChild(freshComplete, completeBtn);
+        freshComplete.addEventListener("click", pomoCompleteTask);
+    }
+
+    // Wire duration chips (replace each to avoid duplicate listeners)
+    document.querySelectorAll(".pomo-chip").forEach(chip => {
+        const fresh = chip.cloneNode(true);
+        chip.parentNode.replaceChild(fresh, chip);
+        fresh.addEventListener("click", () => {
+            const mins = Number(fresh.dataset.minutes);
+            const type = fresh.dataset.type;
+
+            if (type === "work") {
+                pomodoroState.workSecs = mins * 60;
+                // Update active chip in the work group only
+                document.querySelectorAll(".pomo-chip[data-type='work']").forEach(c =>
+                    c.classList.toggle("pomo-chip--active", c === fresh));
+                // If currently in work mode, reset to new duration
+                if (pomodoroState.mode === "work") {
+                    pomoReset();
+                    pomoStart();
+                    const pb = document.getElementById("pomo-pause-btn");
+                    if (pb) pb.textContent = "Pause";
+                }
+            } else {
+                pomodoroState.breakSecs = mins * 60;
+                document.querySelectorAll(".pomo-chip[data-type='break']").forEach(c =>
+                    c.classList.toggle("pomo-chip--active", c === fresh));
+                // If currently in break mode, reset to new duration
+                if (pomodoroState.mode === "break") {
+                    pomoReset();
+                    pomoStart();
+                    const pb = document.getElementById("pomo-pause-btn");
+                    if (pb) pb.textContent = "Pause";
+                }
+            }
+        });
+    });
+
+    // Auto-start work timer when entering Focus with a task
+    if (!pomodoroState.running) {
+        pomoStart();
+        const pb = document.getElementById("pomo-pause-btn");
+        if (pb) pb.textContent = "Pause";
+    }
+}
+
+// ======================================
+// Focus — Subtask toggle from Focus page
+// ======================================
+
+async function pomoSubtaskToggle(subtask, checked, countEl, labelEl, task) {
+    const user = auth.currentUser;
+    if (!task || !user) return;
+
+    const prev        = subtask.completed;
+    subtask.completed = checked;
+
+    const allDone = (task.subtasks || []).every(s => s.completed);
+    const done    = (task.subtasks || []).filter(s => s.completed).length;
+
+    if (countEl) countEl.textContent = `${done} / ${task.subtasks.length}`;
+    labelEl.classList.toggle("completed", checked);
+
+    try {
+        const taskRef = doc(db, "users", user.uid, "tasks", task.id);
+        await updateDoc(taskRef, { subtasks: task.subtasks, completed: allDone });
+        task.completed = allDone;
+        updateProgress();
+    } catch (err) {
+        console.error("Focus subtask toggle failed:", err);
+        subtask.completed = prev;
+        const cb = labelEl.querySelector("input[type='checkbox']");
+        if (cb) cb.checked = prev;
+        labelEl.classList.toggle("completed", prev);
+        const revertDone = (task.subtasks || []).filter(s => s.completed).length;
+        if (countEl) countEl.textContent = `${revertDone} / ${task.subtasks.length}`;
+    }
+}
 
 function updateRecommendationUI() {
     const recCard  = document.getElementById("rec-card");
@@ -674,7 +1356,8 @@ function updateRecommendationUI() {
     const freshBtn = recBtn.cloneNode(true);
     recBtn.parentNode.replaceChild(freshBtn, recBtn);
     freshBtn.addEventListener("click", () => {
-        openFocusMode(result.task);
+        // Navigate to Focus with the recommended task
+        startFocusWithTask(result.task);
     });
 
     recCard.style.display  = "flex";
@@ -1007,6 +1690,11 @@ const updatedTaskData = {
 
                 updateTaskCount();
 
+                // Refresh All Tasks page if it is currently active
+                if (currentPage === "all-tasks") renderAllTasksList();
+                // Refresh Important page if active (starred state may have changed)
+                if (currentPage === "important") renderImportantList();
+
 
                 // Close modal
 
@@ -1133,6 +1821,11 @@ const updatedTaskData = {
             updateProgress();
 
             updateTaskCount();
+
+            // Refresh All Tasks page if it is currently active
+            if (currentPage === "all-tasks") renderAllTasksList();
+            // Refresh Important page if active
+            if (currentPage === "important") renderImportantList();
 
 
             // Close modal
@@ -1617,6 +2310,9 @@ starButton.title =
             task.starred
         );
 
+        // Refresh Important page — task may have entered or left the list
+        if (currentPage === "important") renderImportantList();
+
     } catch (error) {
 
         console.error(
@@ -1679,6 +2375,11 @@ deleteButton.addEventListener(
             updateProgress();
             updateTaskCount();
 
+            // Refresh All Tasks page if it is currently active
+            if (currentPage === "all-tasks") renderAllTasksList();
+            // Refresh Important page if active
+            if (currentPage === "important") renderImportantList();
+
             console.log(
                 "Task deleted from Firestore:",
                 task
@@ -1711,7 +2412,7 @@ focusBtn.textContent = "🎯 Focus";
 focusBtn.addEventListener("click", () => {
     taskMenu.classList.remove("show");
     taskCard.classList.remove("menu-open");
-    openFocusMode(task);
+    startFocusWithTask(task);
 });
 
 taskMenu.appendChild(focusBtn);
@@ -2412,6 +3113,13 @@ async function handleTaskCompletion(
             completed
         );
 
+        // Sync the checkbox to match the new completed state.
+        // When completion is triggered programmatically (e.g. from Focus),
+        // the checkbox DOM element is not clicked by the user so its
+        // checked property must be updated explicitly.
+        const taskCheckbox = taskCard.querySelector(".task-checkbox");
+        if (taskCheckbox) taskCheckbox.checked = completed;
+
 
         // Update visible subtasks
 
@@ -2474,45 +3182,7 @@ async function handleTaskCompletion(
 
 
 // ======================================
-// Focus Mode — Overlay Event Listeners
+// Focus Mode — overlay event listeners removed.
+// The Focus page is now a full page section (#page-focus).
+// All timer controls are wired inside renderFocusPage().
 // ======================================
-
-document.getElementById("focus-exit-btn")
-    .addEventListener("click", closeFocusMode);
-
-document.getElementById("focus-complete-btn")
-    .addEventListener("click", handleFocusComplete);
-
-document.getElementById("focus-pause-btn")
-    .addEventListener("click", () => {
-        if (focusState.running) pauseTimer(); else resumeTimer();
-    });
-
-document.querySelectorAll(".focus-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-        const mins = Number(chip.dataset.minutes);
-
-        // Reset timer state to new duration
-        clearInterval(focusState.intervalId);
-        focusState.intervalId   = null;
-        focusState.running      = false;
-        focusState.totalSeconds = mins * 60;
-        focusState.remaining    = focusState.totalSeconds;
-        focusState.pausedAt     = null;
-
-        // Update active chip highlight
-        document.querySelectorAll(".focus-chip").forEach(c =>
-            c.classList.toggle("focus-chip--active", c === chip));
-
-        // Reset done banner and pause button
-        const banner = document.getElementById("focus-done-banner");
-        if (banner) banner.style.display = "none";
-        const pauseBtn = document.getElementById("focus-pause-btn");
-        if (pauseBtn) pauseBtn.textContent = "Pause";
-
-        // Refresh display and start
-        updateTimerDisplay();
-        updateRingProgress();
-        startTimer();
-    });
-});

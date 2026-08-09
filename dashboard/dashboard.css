@@ -2073,3 +2073,785 @@ border-color: var(--border);
     .focus-controls      { flex-direction: column; }
     .focus-btn           { width: 100%; }
 }
+
+/* ======================================
+   PAGE SECTIONS (show / hide)
+====================================== */
+
+.page-section {
+    display: block;
+}
+
+/* ======================================
+   CATEGORY FILTER BAR
+====================================== */
+
+.category-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.category-filter-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.category-filter-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.category-filter-btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.category-filter-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ======================================
+   ALL TASKS — EMPTY STATE
+====================================== */
+
+.all-tasks-empty {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* ======================================
+   CALENDAR — NAV BAR
+====================================== */
+
+.cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.cal-nav-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 20px;
+    line-height: 1;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cal-nav-btn:hover {
+    background: var(--bg-hover);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.cal-nav-btn--today {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+}
+
+.cal-nav-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.cal-month-label {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-left: 6px;
+}
+
+/* ======================================
+   CALENDAR — DAY-OF-WEEK HEADER
+====================================== */
+
+.cal-dow-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.cal-dow-header span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 4px 0;
+}
+
+/* ======================================
+   CALENDAR — MONTH GRID
+====================================== */
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+/* ======================================
+   CALENDAR — DAY CELL
+====================================== */
+
+.cal-day {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-height: 90px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: default;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.cal-day:hover {
+    border-color: var(--accent);
+}
+
+/* Day number label */
+.cal-day-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 1;
+    margin-bottom: 2px;
+    align-self: flex-end;
+}
+
+/* Today highlight */
+.cal-day--today .cal-day-num {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}
+
+.cal-day--today {
+    border-color: var(--accent);
+}
+
+/* Days outside current month */
+.cal-day--outside {
+    background: var(--bg-soft);
+    opacity: 0.55;
+}
+
+.cal-day--outside .cal-day-num {
+    color: var(--text-muted);
+}
+
+/* ======================================
+   CALENDAR — TASK CHIPS
+====================================== */
+
+.cal-task-chip {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+    transition: background 0.12s ease;
+    line-height: 1.4;
+}
+
+.cal-task-chip:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cal-task-chip--completed {
+    background: var(--bg-soft);
+    border-color: var(--border);
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.cal-task-chip--completed:hover {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
+
+/* Overflow count "+N more" */
+.cal-task-overflow {
+    font-size: 10px;
+    color: var(--text-muted);
+    padding: 1px 4px;
+    cursor: pointer;
+}
+
+.cal-task-overflow:hover {
+    color: var(--accent);
+}
+
+/* ======================================
+   CALENDAR — TASK DETAIL PANEL
+====================================== */
+
+.cal-detail-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    max-width: 95vw;
+    height: 100vh;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: panelSlideIn 0.2s ease;
+}
+
+@keyframes panelSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+.cal-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.cal-detail-date {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.cal-detail-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cal-detail-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+}
+
+.cal-detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Empty state inside panel */
+.cal-detail-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 32px 16px;
+}
+
+/* ======================================
+   CALENDAR — DARK THEME FIXES
+====================================== */
+
+[data-theme="dark"] {
+
+    .cal-day {
+        background: var(--bg-surface);
+        border-color: var(--border);
+    }
+
+    .cal-day--outside {
+        background: var(--bg-soft);
+    }
+
+    .cal-task-chip {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .cal-task-chip:hover {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .cal-task-chip--completed {
+        background: var(--bg-soft);
+        border-color: var(--border);
+        color: var(--text-muted);
+    }
+
+    .cal-detail-panel {
+        background: var(--bg-surface);
+        border-left-color: var(--border);
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+    }
+}
+
+/* ======================================
+   CALENDAR — RESPONSIVE
+====================================== */
+
+@media (max-width: 800px) {
+    .cal-day {
+        min-height: 60px;
+        padding: 4px;
+    }
+
+    .cal-task-chip {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+
+    .cal-month-label {
+        font-size: 16px;
+    }
+
+    .cal-detail-panel {
+        width: 100vw;
+    }
+}
+
+/* ======================================
+   FOCUS / POMODORO PAGE
+====================================== */
+
+/* Centred column layout for the workspace */
+#page-focus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ======================================
+   FOCUS — EMPTY STATE
+====================================== */
+
+.pomo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 24px;
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.pomo-empty-icon {
+    font-size: 56px;
+    line-height: 1;
+}
+
+.pomo-empty-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.pomo-empty-hint {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ======================================
+   FOCUS — WORKSPACE WRAPPER
+====================================== */
+
+#focus-workspace {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ======================================
+   FOCUS — MODE BADGE
+====================================== */
+
+.pomo-mode-badge {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 20px;
+    border: 2px solid transparent;
+}
+
+.pomo-mode-badge--work {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.pomo-mode-badge--break {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #16a34a;
+}
+
+[data-theme="dark"] .pomo-mode-badge--break {
+    background: #052e16;
+    color: #4ade80;
+    border-color: #4ade80;
+}
+
+/* ======================================
+   FOCUS — CIRCULAR TIMER RING
+====================================== */
+
+.pomo-ring-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pomo-ring-svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.pomo-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 8;
+}
+
+.pomo-ring-progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 339.292;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.9s linear, stroke 0.4s ease;
+}
+
+/* Break mode ring turns green */
+.pomo-ring-progress--break {
+    stroke: #16a34a;
+}
+
+[data-theme="dark"] .pomo-ring-progress--break {
+    stroke: #4ade80;
+}
+
+.pomo-timer-display {
+    font-size: 58px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -2px;
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 1;
+}
+
+/* ======================================
+   FOCUS — TIMER CONTROLS
+====================================== */
+
+.pomo-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.pomo-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 11px 26px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.pomo-btn:active {
+    transform: scale(0.97);
+}
+
+.pomo-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.pomo-btn--secondary {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.pomo-btn--secondary:hover {
+    background: var(--bg-hover);
+}
+
+.pomo-btn--complete {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 15px;
+}
+
+.pomo-btn--complete:hover {
+    background: var(--accent-hover);
+}
+
+/* ======================================
+   FOCUS — TRANSITION BANNER
+====================================== */
+
+.pomo-banner {
+    width: 100%;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: center;
+}
+
+.pomo-banner--break {
+    background: #f0fdf4;
+    border-color: #16a34a;
+    color: #16a34a;
+}
+
+[data-theme="dark"] .pomo-banner--break {
+    background: #052e16;
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+/* ======================================
+   FOCUS — TASK INFO CARD
+====================================== */
+
+.pomo-task-card {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pomo-task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pomo-task-meta span {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.pomo-task-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.pomo-task-due {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ======================================
+   FOCUS — DURATION SETTINGS
+====================================== */
+
+.pomo-settings {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pomo-setting-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pomo-setting-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    min-width: 38px;
+}
+
+.pomo-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pomo-chip {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.pomo-chip:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pomo-chip--active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.pomo-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ======================================
+   FOCUS — SUBTASKS
+====================================== */
+
+.pomo-subtasks-details {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+}
+
+.pomo-subtasks-summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.pomo-subtasks-summary::-webkit-details-marker {
+    display: none;
+}
+
+.pomo-subtasks-count {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.pomo-subtasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Individual subtask rows reuse .focus-subtask-item styles already defined */
+
+/* ======================================
+   FOCUS — RESPONSIVE
+====================================== */
+
+@media (max-width: 600px) {
+    .pomo-timer-display { font-size: 46px; }
+    .pomo-ring-wrap     { width: 160px; height: 160px; }
+    .pomo-controls      { flex-direction: column; width: 100%; }
+    .pomo-btn           { width: 100%; }
+}
