@@ -241,6 +241,16 @@ addTaskBtn.addEventListener("click", () => {
     // Reset form
     taskForm.reset();
 
+    // Reset effort to default
+    document.getElementById("taskEffort").value = "30";
+
+    // Reset reminder note
+    const reminderNote = document.getElementById("reminderNote");
+    if (reminderNote) {
+        reminderNote.style.display = "none";
+        reminderNote.textContent = "";
+    }
+
     // Reset subtasks
     subtasks = [];
 
@@ -464,7 +474,9 @@ taskForm.addEventListener(
         const repeat =
             document.getElementById("taskRepeat").value;
 
-        
+        const estimatedEffort =
+            document.getElementById("taskEffort").value;
+
 
         // ===============================
         // Check user
@@ -544,7 +556,9 @@ const updatedTaskData = {
 
     subtasks: updatedSubtasks,
 
-    completed: updatedCompleted
+    completed: updatedCompleted,
+
+    estimatedEffort: estimatedEffort
 
 };
 
@@ -586,6 +600,9 @@ const updatedTaskData = {
                     
                 editingTask.completed =
                 updatedCompleted;
+
+                editingTask.estimatedEffort =
+                    estimatedEffort;
 
                 console.log(
                     "Task updated in Firestore:",
@@ -687,6 +704,8 @@ const updatedTaskData = {
             reminder: reminder,
 
             repeat: repeat,
+
+            estimatedEffort: estimatedEffort,
 
             subtasks: [...subtasks],
 
@@ -826,24 +845,17 @@ function addTaskToUI(task) {
 
                 ${
                     task.dueDate && task.dueTime
-                    ? `
-                        <span>
-                            📅 ${task.dueDate}
-                            ⏰ ${formatTime(task.dueTime)}
-                        </span>
-                    `
+                    ? `<span>📅 Due: ${formatDueDateTime(task.dueDate, task.dueTime)}</span>`
                     : task.dueDate
-                    ? `
-                        <span>
-                            📅 ${task.dueDate}
-                        </span>
-                    `
+                    ? `<span>📅 Due: ${formatDueDate(task.dueDate)}</span>`
                     : task.dueTime
-                    ? `
-                        <span>
-                            ⏰ ${formatTime(task.dueTime)}
-                        </span>
-                    `
+                    ? `<span>⏰ Due: ${formatTime(task.dueTime)}</span>`
+                    : ""
+                }
+
+                ${
+                    task.estimatedEffort
+                    ? `<span>⏱ ${formatEffort(task.estimatedEffort)}</span>`
                     : ""
                 }
 
@@ -1083,6 +1095,9 @@ document.getElementById(
 
     document.getElementById("taskRepeat").value =
         task.repeat || "";
+
+    document.getElementById("taskEffort").value =
+        task.estimatedEffort || "30";
 
 
     // ===============================
@@ -1670,6 +1685,39 @@ function formatTime(time) {
         }
     );
 
+}
+
+// ======================================
+// Due Date / Time Formatting
+// ======================================
+
+function formatDueDate(dateStr) {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatDueDateTime(dateStr, timeStr) {
+    const datePart = formatDueDate(dateStr);
+    const timePart = formatTime(timeStr);
+    if (datePart && timePart) return `${datePart}, ${timePart}`;
+    return datePart || timePart;
+}
+
+// ======================================
+// Estimated Effort Formatting
+// ======================================
+
+function formatEffort(value) {
+    const labels = {
+        "15":   "15 min",
+        "30":   "30 min",
+        "60":   "1 hr",
+        "120":  "2 hrs",
+        "180+": "3+ hrs"
+    };
+    return labels[value] || `${value} min`;
 }
 
 // ======================================
