@@ -20,6 +20,11 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import {
+    getRecommendedTask,
+    getRecommendationReasons
+} from "./scoring.js";
+
 // ======================================
 // Theme System
 // ======================================
@@ -303,6 +308,28 @@ const taskList =
 
 let editingTask = null;
 let editingTaskCard = null;
+
+// ======================================
+// Task Collection (for scoring engine)
+// ======================================
+
+// Mirror of all tasks currently in the UI.
+// Kept in sync by addTaskToUI (add) and the delete/edit flows (remove+re-add).
+let allTasks = [];
+
+function logRecommendation() {
+    const result = getRecommendedTask(allTasks);
+    if (!result) {
+        console.log("[Recommendation] Recommended task: None");
+        return;
+    }
+    const reasons = getRecommendationReasons(result.task, result.breakdown);
+    console.log(
+        "[Recommendation] Recommended task:", result.task.title, "\n"
+        + "  Score: " + result.score + "\n"
+        + "  Reasons:\n    " + reasons.join("\n    ")
+    );
+}
 
 // ======================================
 // Subtasks
@@ -617,6 +644,9 @@ const updatedTaskData = {
                     editingTaskCard.remove();
 
                 }
+
+                // Remove stale entry so addTaskToUI re-adds the updated one
+                allTasks = allTasks.filter(t => t.id !== editingTask.id);
 
                 addTaskToUI(editingTask);
 
@@ -936,6 +966,9 @@ function addTaskToUI(task) {
 
 
     taskList.appendChild(taskCard);
+
+    // Register task in the scoring engine mirror
+    allTasks.push(task);
 
     const subtaskSection =
     taskCard.querySelector(
@@ -1289,6 +1322,9 @@ deleteButton.addEventListener(
             await deleteDoc(taskRef);
 
             taskCard.remove();
+
+            // Remove from scoring engine mirror
+            allTasks = allTasks.filter(t => t.id !== task.id);
 
             updateProgress();
             updateTaskCount();
@@ -1777,6 +1813,9 @@ function updateProgress() {
             `${percentage}%`;
 
     }
+
+    // Recalculate recommendation whenever task set changes
+    logRecommendation();
 
 }
 
