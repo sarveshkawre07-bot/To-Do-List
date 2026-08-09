@@ -1,4 +1,6 @@
-// dashboard.js
+// ============================================================
+// TO-DO FLOW - COMPLETE DASHBOARD
+// ============================================================
 
 import {
     auth,
@@ -20,19 +22,80 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-// ======================================
-// Theme System
-// ======================================
+
+// ============================================================
+// GLOBAL VARIABLES
+// ============================================================
+
+let currentUser = null;
+
+let allTasks = [];
+
+let allGoals = [];
+
+let categories = [
+    {
+        id: "personal",
+        name: "Personal",
+        icon: "👤"
+    },
+    {
+        id: "work",
+        name: "Work",
+        icon: "💼"
+    },
+    {
+        id: "study",
+        name: "Study",
+        icon: "📚"
+    },
+    {
+        id: "fitness",
+        name: "Fitness",
+        icon: "🏋️"
+    }
+];
+
+let currentPage = "today";
+
+let editingTask = null;
+
+let subtasks = [];
+
+let selectedCalendarDate = null;
+
+let calendarDate = new Date();
+
+
+// ============================================================
+// DOM
+// ============================================================
+
+const taskList =
+    document.getElementById("taskList");
+
+const taskModal =
+    document.getElementById("taskModal");
+
+const taskForm =
+    document.getElementById("taskForm");
+
+const addTaskBtn =
+    document.getElementById("addTaskBtn");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const pageTitle =
+    document.getElementById("pageTitle");
+
+
+// ============================================================
+// THEME
+// ============================================================
 
 const themeToggle =
     document.getElementById("themeToggle");
-
-const themeIcon =
-    document.getElementById("themeIcon");
-
-const themeText =
-    document.getElementById("themeText");
-
 
 function applyTheme(theme) {
 
@@ -41,1911 +104,1635 @@ function applyTheme(theme) {
         theme
     );
 
-    if (theme === "dark") {
-
-        themeIcon.textContent = "☀️";
-        themeText.textContent = "Light Mode";
-
-    } else {
-
-        themeIcon.textContent = "🌙";
-        themeText.textContent = "Dark Mode";
-
-    }
-
-}
-
-
-// Load saved theme immediately
-
-const savedTheme =
-    localStorage.getItem("theme") || "light";
-
-applyTheme(savedTheme);
-
-
-// Toggle theme
-
-if (themeToggle) {
-
-    themeToggle.addEventListener(
-        "click",
-        () => {
-
-            const currentTheme =
-                document.documentElement
-                    .getAttribute("data-theme");
-
-            const newTheme =
-                currentTheme === "dark"
-                    ? "light"
-                    : "dark";
-
-            localStorage.setItem(
-                "theme",
-                newTheme
-            );
-
-            applyTheme(newTheme);
-
-        }
-    );
-
-}
-
-
-// ======================================
-// Authentication
-// ======================================
-
-const logoutButton = document.getElementById("logoutBtn");
-
-onAuthStateChanged(auth, (user) => {
-
-    if (user) {
-
-        console.log("Logged in user:", user);
-
-        // User's name
-        const userName = document.getElementById("userName");
-
-        if (userName) {
-            userName.textContent = user.displayName || "User";
-        }
-
-        // User's profile picture
-        const profileImage = document.getElementById("profileImage");
-
-        if (profileImage) {
-            console.log("Profile photo URL:", user.photoURL);
-            
-            if (user.photoURL) {
-                profileImage.src = user.photoURL;
-            }
-        }
-         // Load Firestore tasks
-        loadTasks();
-
-    } else {
-
-        // No authenticated user
-        window.location.href = "../login/login.html";
-
-    }
-
-});
-
-
-// ======================================
-// Logout
-// ======================================
-
-logoutButton.addEventListener("click", async () => {
-
-    try {
-
-        await signOut(auth);
-
-        localStorage.removeItem("user");
-
-        window.location.href = "../login/login.html";
-
-    } catch (error) {
-
-        console.error("Logout failed:", error);
-
-    }
-
-});
-
-
-// ======================================
-// Dynamic Date
-// ======================================
-
-const currentDateElement =
-    document.getElementById("currentDate");
-
-const now = new Date();
-
-const dateOptions = {
-    weekday: "long",
-    month: "long",
-    day: "numeric"
-};
-
-if (currentDateElement) {
-
-    currentDateElement.textContent =
-        now.toLocaleDateString("en-US", dateOptions);
-
-}
-
-
-// ======================================
-// Dynamic Greeting
-// ======================================
-
-const greetingText =
-    document.getElementById("greetingText");
-
-const currentHour = now.getHours();
-
-let greeting;
-
-if (currentHour < 12) {
-
-    greeting = "Good morning";
-
-} else if (currentHour < 18) {
-
-    greeting = "Good afternoon";
-
-} else {
-
-    greeting = "Good evening";
-
-}
-
-if (greetingText) {
-
-    greetingText.textContent = greeting;
-
-}
-
-// ======================================
-// Add Task Modal
-// ======================================
-
-const addTaskBtn =
-    document.getElementById("addTaskBtn");
-
-const taskModal =
-    document.getElementById("taskModal");
-
-const closeModalBtn =
-    document.getElementById("closeModalBtn");
-
-const cancelTaskBtn =
-    document.getElementById("cancelTaskBtn");
-
-
-// Open modal
-
-addTaskBtn.addEventListener("click", () => {
-
-    // Switch back to Create mode
-    editingTask = null;
-    editingTaskCard = null;
-
-    // Reset form
-    taskForm.reset();
-
-    // Reset subtasks
-    subtasks = [];
-
-    renderSubtasks();
-
-    // Reset modal title
     document.getElementById(
-        "taskModalTitle"
-    ).textContent = "Create New Task";
+        "themeIcon"
+    ).textContent =
+        theme === "dark"
+            ? "☀️"
+            : "🌙";
 
-    // Reset submit button
     document.getElementById(
-        "taskSubmitBtn"
-    ).textContent = "Create Task";
+        "themeText"
+    ).textContent =
+        theme === "dark"
+            ? "Light Mode"
+            : "Dark Mode";
+}
 
-    // Open modal
-    taskModal.classList.add("show");
+applyTheme(
+    localStorage.getItem("theme") || "light"
+);
 
-});
+themeToggle.addEventListener(
+    "click",
+    () => {
 
+        const current =
+            document.documentElement
+                .getAttribute("data-theme");
 
-// Close modal
+        const newTheme =
+            current === "dark"
+                ? "light"
+                : "dark";
 
-closeModalBtn.addEventListener("click", () => {
-
-    taskModal.classList.remove("show");
-
-});
-
-
-cancelTaskBtn.addEventListener("click", () => {
-
-    taskModal.classList.remove("show");
-
-});
-
-// ======================================
-// Task Form
-// ======================================
-
-const taskForm =
-    document.getElementById("taskForm");
-
-const taskList =
-    document.getElementById("taskList");
-
-// ======================================
-// Task Form Mode
-// ======================================
-
-let editingTask = null;
-let editingTaskCard = null;
-
-// ======================================
-// Subtasks
-// ======================================
-
-let subtasks = [];
-
-const addSubtaskButton =
-    document.getElementById("addSubtaskBtn");
-
-const subtaskContainer =
-    document.getElementById("subtaskInputContainer");
-
-
-addSubtaskButton.addEventListener("click", () => {
-
-    const input =
-        subtaskContainer.querySelector(
-            ".subtask-title"
+        localStorage.setItem(
+            "theme",
+            newTheme
         );
 
-    const title =
-        input.value.trim();
-
-
-    if (!title) {
-        input.focus();
-        return;
+        applyTheme(newTheme);
     }
+);
 
 
-    const subtask = {
+// ============================================================
+// DATE + GREETING
+// ============================================================
 
-        id: Date.now(),
+function updateHeader() {
 
-        title: title,
+    const now = new Date();
 
-        completed: false
-
-    };
-
-
-    subtasks.push(subtask);
-
-
-    renderSubtasks();
-
-
-    input.value = "";
-
-    input.focus();
-
-
-    console.log(
-        "Subtasks:",
-        subtasks
-    );
-
-});
-
-function renderSubtasks() {
-
-    const existingItems =
-        subtaskContainer.querySelectorAll(
-            ".subtask-item"
-        );
-
-
-    existingItems.forEach(item => {
-        item.remove();
-    });
-
-
-    subtasks.forEach((subtask) => {
-
-        const subtaskElement =
-            document.createElement("div");
-
-
-        subtaskElement.className =
-            "subtask-item";
-
-
-        subtaskElement.innerHTML = `
-
-            <span class="subtask-check">
-                ☐
-            </span>
-
-            <span class="subtask-name">
-                ${subtask.title}
-            </span>
-
-            <button
-                type="button"
-                class="remove-subtask"
-                data-id="${subtask.id}"
-                title="Remove subtask"
-            >
-                ×
-            </button>
-
-        `;
-
-
-        const removeButton =
-            subtaskElement.querySelector(
-                ".remove-subtask"
-            );
-
-
-        removeButton.addEventListener(
-            "click",
-            () => {
-
-                subtasks =
-                    subtasks.filter(
-                        item =>
-                            item.id !== subtask.id
-                    );
-
-
-                renderSubtasks();
-
+    document.getElementById(
+        "currentDate"
+    ).textContent =
+        now.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "long",
+                day: "numeric"
             }
         );
 
 
-        subtaskContainer.appendChild(
-            subtaskElement
-        );
+    const hour =
+        now.getHours();
 
-    });
+    let greeting;
 
+    if (hour < 12) {
+
+        greeting = "Good morning";
+
+    } else if (hour < 18) {
+
+        greeting = "Good afternoon";
+
+    } else {
+
+        greeting = "Good evening";
+    }
+
+
+    document.getElementById(
+        "greetingText"
+    ).textContent =
+        greeting;
 }
 
+updateHeader();
 
-taskForm.addEventListener(
-    "submit",
-    async (event) => {
 
-        event.preventDefault();
+// ============================================================
+// AUTH
+// ============================================================
 
-        // ===============================
-        // Get form values
-        // ===============================
-
-        const title =
-            document.getElementById("taskTitle").value.trim();
-
-        const description =
-            document.getElementById("taskDescription").value.trim();
-
-        const category =
-            document.getElementById("taskCategory").value;
-
-        const priority =
-            document.getElementById("taskPriority").value;
-
-        const dueDate =
-            document.getElementById("taskDueDate").value;
-
-        const dueTime =
-            document.getElementById("taskDueTime").value;
-
-        const reminder =
-            document.getElementById("taskReminder").value;
-
-        const repeat =
-            document.getElementById("taskRepeat").value;
-
-        
-
-        // ===============================
-        // Check user
-        // ===============================
-
-        const user = auth.currentUser;
+onAuthStateChanged(
+    auth,
+    async (user) => {
 
         if (!user) {
 
-            console.error(
-                "No authenticated user."
-            );
+            window.location.href =
+                "../login/login.html";
 
             return;
-
         }
 
 
-        // ===============================
-        // EDIT EXISTING TASK
-        // ===============================
+        currentUser = user;
 
-        if (editingTask) {
 
-            try {
+        document.getElementById(
+            "userName"
+        ).textContent =
+            user.displayName || "User";
 
-                const taskRef = doc(
-                    db,
-                    "users",
-                    user.uid,
-                    "tasks",
-                    editingTask.id
-                );
 
+        if (user.photoURL) {
 
-                // ======================================
-// Determine task completion from subtasks
-// ======================================
-
-const updatedSubtasks =
-    [...subtasks];
-
-const allSubtasksCompleted =
-    updatedSubtasks.length > 0 &&
-    updatedSubtasks.every(
-        (subtask) =>
-            subtask.completed === true
-    );
-
-
-// A task is complete only when
-// all of its subtasks are complete.
-
-const updatedCompleted =
-    updatedSubtasks.length > 0
-        ? allSubtasksCompleted
-        : editingTask.completed;
-
-
-const updatedTaskData = {
-
-    title: title,
-
-    description: description,
-
-    category: category,
-
-    priority: priority,
-
-    dueDate: dueDate,
-
-    dueTime: dueTime,
-
-    reminder: reminder,
-
-    repeat: repeat,
-
-    subtasks: updatedSubtasks,
-
-    completed: updatedCompleted
-
-};
-
-
-                await updateDoc(
-                    taskRef,
-                    updatedTaskData
-                );
-
-
-                // Update local task object
-
-                editingTask.title =
-                    title;
-
-                editingTask.description =
-                    description;
-
-                editingTask.category =
-                    category;
-
-                editingTask.priority =
-                    priority;
-
-                editingTask.dueDate =
-                    dueDate;
-
-                editingTask.dueTime =
-                    dueTime;
-
-                editingTask.reminder =
-                    reminder;
-
-                editingTask.repeat =
-                    repeat;
-
-                editingTask.subtasks =
-                    [...subtasks];
-                    
-                editingTask.completed =
-                updatedCompleted;
-
-                console.log(
-                    "Task updated in Firestore:",
-                    editingTask
-                );
-
-
-                // Replace old card with updated card
-
-                if (editingTaskCard) {
-
-                    editingTaskCard.remove();
-
-                }
-
-                addTaskToUI(editingTask);
-
-
-                // Update dashboard
-
-                updateProgress();
-
-                updateTaskCount();
-
-
-                // Close modal
-
-                taskModal.classList.remove("show");
-
-
-                // Reset form state
-
-                taskForm.reset();
-
-                subtasks = [];
-
-                editingTask = null;
-
-                editingTaskCard = null;
-
-                renderSubtasks();
-
-
-                // Reset modal UI
-
-                document.getElementById(
-                    "taskModalTitle"
-                ).textContent =
-                    "Create New Task";
-
-                document.getElementById(
-                    "taskSubmitBtn"
-                ).textContent =
-                    "Create Task";
-
-
-                return;
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to update task:",
-                    error
-                );
-
-                alert(
-                    "Unable to update this task. Please try again."
-                );
-
-                return;
-
-            }
-
+            document.getElementById(
+                "profileImage"
+            ).src =
+                user.photoURL;
         }
 
 
-        // ===============================
-        // CREATE NEW TASK
-        // ===============================
+        await loadCategories();
 
-        const task = {
+        await loadTasks();
 
-            title: title,
+        await loadGoals();
 
-            description: description,
+        populateCategorySelect();
 
-            category: category,
+        renderPage();
 
-            priority: priority,
+        calculatePoints();
 
-            completed: false,
+        requestNotificationPermission();
 
-            starred: false,
-
-            dueDate: dueDate,
-
-            dueTime: dueTime,
-
-            reminder: reminder,
-
-            repeat: repeat,
-
-            subtasks: [...subtasks],
-
-            createdAt: serverTimestamp()
-
-        };
-
-
-        console.log(
-            "New task:",
-            task
-        );
-
-
-        try {
-
-            const tasksCollection =
-                collection(
-                    db,
-                    "users",
-                    user.uid,
-                    "tasks"
-                );
-
-
-            const taskRef =
-                await addDoc(
-                    tasksCollection,
-                    task
-                );
-
-
-            task.id =
-                taskRef.id;
-
-
-            console.log(
-                "Task saved to Firestore:",
-                task
-            );
-
-
-            addTaskToUI(task);
-
-            updateProgress();
-
-            updateTaskCount();
-
-
-            // Close modal
-
-            taskModal.classList.remove("show");
-
-
-            // Reset form
-
-            taskForm.reset();
-
-            subtasks = [];
-
-            editingTask = null;
-
-            editingTaskCard = null;
-
-            renderSubtasks();
-
-
-        } catch (error) {
-
-            console.error(
-                "Failed to create task:",
-                error
-            );
-
-            alert(
-                "Unable to create this task. Please try again."
-            );
-
-        }
-
+        setupReminderChecker();
     }
 );
 
 
-// ======================================
-// Display Task
-// ======================================
+// ============================================================
+// LOGOUT
+// ============================================================
 
-function addTaskToUI(task) {
+document.getElementById(
+    "logoutBtn"
+).addEventListener(
+    "click",
+    async () => {
 
-    const taskCard =
-        document.createElement("article");
+        try {
 
-    taskCard.className = "task-card";
+            await signOut(auth);
 
+            window.location.href =
+                "../login/login.html";
 
-    taskCard.innerHTML = `
+        } catch (error) {
 
-    <div class="task-main-row">
+            console.error(error);
 
-        <!-- Task checkbox -->
-
-        <div class="task-check">
-
-            <input
-                type="checkbox"
-                class="task-checkbox"
-                ${task.completed ? "checked" : ""}
-            >
-
-        </div>
-
-
-        <!-- Task information -->
-
-        <div class="task-info">
-
-            <h3>
-                ${task.title}
-            </h3>
-
-            <p>
-                ${task.description || "No description added."}
-            </p>
-
-            <div class="task-meta">
-
-                <span>
-    ${getCategoryIcon(task.category)}
-    ${formatCategory(task.category)}
-</span>
-
-                <span>
-                    ${getPriorityIcon(task.priority)}
-                    ${formatPriority(task.priority)}
-                </span>
-
-                ${
-                    task.dueDate && task.dueTime
-                    ? `
-                        <span>
-                            📅 ${task.dueDate}
-                            ⏰ ${formatTime(task.dueTime)}
-                        </span>
-                    `
-                    : task.dueDate
-                    ? `
-                        <span>
-                            📅 ${task.dueDate}
-                        </span>
-                    `
-                    : task.dueTime
-                    ? `
-                        <span>
-                            ⏰ ${formatTime(task.dueTime)}
-                        </span>
-                    `
-                    : ""
-                }
-
-            </div>
-
-        </div>
-
-
-        <!-- Task actions -->
-
-        <div class="task-actions">
-
-            <button
-                class="star-task-btn ${task.starred ? "important" : ""}"
-                type="button"
-                title="${task.starred ? "Unmark important" : "Mark important"}"
-            >
-                ${task.starred ? "★" : "☆"}
-            </button>
-
-
-            <button
-                class="task-menu-btn"
-                type="button"
-                title="Task options"
-            >
-                ⋮
-            </button>
-
-
-            <div class="task-menu">
-
-                <button
-                    class="edit-task-btn"
-                    type="button"
-                >
-                    ✏️ Edit
-                </button>
-
-                <button
-                    class="delete-task-btn"
-                    type="button"
-                >
-                    🗑️ Delete
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- Subtasks -->
-
-    <div
-        class="subtask-section"
-        style="display: none;"
-    >
-
-        <div class="subtask-header">
-
-            <strong>
-                Subtasks
-            </strong>
-
-            <span class="subtask-progress">
-                0 / 0 completed
-            </span>
-
-        </div>
-
-        <div class="subtask-list"></div>
-
-    </div>
-
-`;
-
-
-    taskList.appendChild(taskCard);
-
-    const subtaskSection =
-    taskCard.querySelector(
-        ".subtask-section"
-    );
-
-    
-
-renderTaskSubtasks(
-    task,
-    subtaskSection
+            alert(
+                "Logout failed."
+            );
+        }
+    }
 );
 
-// ======================================
-// Expand / Collapse Subtasks
-// ======================================
 
-taskCard.addEventListener(
-    "click",
-    (event) => {
+// ============================================================
+// NAVIGATION
+// ============================================================
 
-        // Don't expand when clicking
-        // buttons or checkboxes
+document
+    .querySelectorAll(
+        ".nav-item[data-page]"
+    )
+    .forEach(
+        item => {
+
+            item.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    currentPage =
+                        item.dataset.page;
+
+
+                    document
+                        .querySelectorAll(
+                            ".nav-item[data-page]"
+                        )
+                        .forEach(
+                            nav =>
+                                nav.classList.toggle(
+                                    "active",
+                                    nav.dataset.page ===
+                                        currentPage
+                                )
+                        );
+
+
+                    const titles = {
+
+                        today: "Today",
+
+                        "all-tasks":
+                            "All Tasks",
+
+                        important:
+                            "Important",
+
+                        calendar:
+                            "Calendar",
+
+                        goals:
+                            "Goals",
+
+                        progress:
+                            "Progress",
+
+                        focus:
+                            "Focus",
+
+                        categories:
+                            "Categories"
+                    };
+
+
+                    pageTitle.textContent =
+                        titles[currentPage];
+
+
+                    renderPage();
+                }
+            );
+        }
+    );
+
+
+// ============================================================
+// SHOW PAGE
+// ============================================================
+
+function renderPage() {
+
+    const taskView =
+        document.getElementById(
+            "taskView"
+        );
+
+    const calendarView =
+        document.getElementById(
+            "calendarView"
+        );
+
+    const goalsView =
+        document.getElementById(
+            "goalsView"
+        );
+
+    const progressView =
+        document.getElementById(
+            "progressView"
+        );
+
+    const focusView =
+        document.getElementById(
+            "focusView"
+        );
+
+    const categoriesView =
+        document.getElementById(
+            "categoriesView"
+        );
+
+
+    [
+        taskView,
+        calendarView,
+        goalsView,
+        progressView,
+        focusView,
+        categoriesView
+    ]
+        .forEach(
+            view => {
+
+                if (view) {
+                    view.hidden = true;
+                }
+            }
+        );
+
+
+    const dashboardProgress =
+        document.getElementById(
+            "dashboardProgress"
+        );
+
+
+    dashboardProgress.hidden =
+        currentPage !== "today";
+
+
+    if (currentPage === "today") {
+
+        taskView.hidden = false;
+
+        document.getElementById(
+            "taskSectionTitle"
+        ).textContent =
+            "Today's Tasks";
+
+        renderTasks(
+            getTodayTasks()
+        );
+
+    }
+
+
+    else if (
+        currentPage ===
+        "all-tasks"
+    ) {
+
+        taskView.hidden = false;
+
+        document.getElementById(
+            "taskSectionTitle"
+        ).textContent =
+            "All Tasks";
+
+        renderTasks(
+            allTasks
+        );
+
+    }
+
+
+    else if (
+        currentPage ===
+        "important"
+    ) {
+
+        taskView.hidden = false;
+
+        document.getElementById(
+            "taskSectionTitle"
+        ).textContent =
+            "Important Tasks";
+
+        renderTasks(
+            allTasks.filter(
+                task =>
+                    task.starred === true
+            )
+        );
+
+    }
+
+
+    else if (
+        currentPage ===
+        "calendar"
+    ) {
+
+        calendarView.hidden = false;
+
+        renderCalendar();
+
+    }
+
+
+    else if (
+        currentPage ===
+        "goals"
+    ) {
+
+        goalsView.hidden = false;
+
+        renderGoals();
+
+    }
+
+
+    else if (
+        currentPage ===
+        "progress"
+    ) {
+
+        progressView.hidden = false;
+
+        renderProgress();
+
+    }
+
+
+    else if (
+        currentPage ===
+        "focus"
+    ) {
+
+        focusView.hidden = false;
+
+    }
+
+
+    else if (
+        currentPage ===
+        "categories"
+    ) {
+
+        categoriesView.hidden = false;
+
+        renderCategories();
+    }
+
+
+    updateTaskCount();
+    updateTodayProgress();
+}
+
+
+// ============================================================
+// TASK LOADING
+// ============================================================
+
+async function loadTasks() {
+
+    const taskCollection =
+        collection(
+            db,
+            "users",
+            currentUser.uid,
+            "tasks"
+        );
+
+
+    const snapshot =
+        await getDocs(
+            taskCollection
+        );
+
+
+    allTasks = [];
+
+
+    snapshot.forEach(
+        item => {
+
+            allTasks.push({
+
+                id: item.id,
+
+                ...item.data()
+            });
+        }
+    );
+
+
+    allTasks.sort(
+        (a, b) => {
+
+            const dateA =
+                a.dueDate || "9999";
+
+            const dateB =
+                b.dueDate || "9999";
+
+            return dateA.localeCompare(
+                dateB
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// TODAY
+// ============================================================
+
+function getTodayString() {
+
+    const date =
+        new Date();
+
+    return `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+        date.getDate()
+    ).padStart(2, "0")}`;
+}
+
+
+function getTodayTasks() {
+
+    const today =
+        getTodayString();
+
+    return allTasks.filter(
+        task => {
+
+            if (!task.dueDate) {
+                return true;
+            }
+
+            return task.dueDate === today;
+        }
+    );
+}
+
+
+// ============================================================
+// SEARCH
+// ============================================================
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
         if (
-            event.target.closest("button") ||
-            event.target.closest("input")
+            currentPage !==
+            "today" &&
+            currentPage !==
+            "all-tasks" &&
+            currentPage !==
+            "important"
         ) {
             return;
         }
 
 
-        const isOpen =
-            subtaskSection.style.display !== "none";
+        let tasks;
 
 
-        subtaskSection.style.display =
-            isOpen
-                ? "none"
-                : "block";
+        if (
+            currentPage ===
+            "today"
+        ) {
 
+            tasks =
+                getTodayTasks();
+
+        } else if (
+            currentPage ===
+            "important"
+        ) {
+
+            tasks =
+                allTasks.filter(
+                    task =>
+                        task.starred
+                );
+
+        } else {
+
+            tasks =
+                allTasks;
+        }
+
+
+        const search =
+            searchInput.value
+                .trim()
+                .toLowerCase();
+
+
+        if (search) {
+
+            tasks =
+                tasks.filter(
+                    task => {
+
+                        return (
+                            task.title
+                                ?.toLowerCase()
+                                .includes(search)
+                            ||
+                            task.description
+                                ?.toLowerCase()
+                                .includes(search)
+                        );
+                    }
+                );
+        }
+
+
+        renderTasks(tasks);
     }
 );
 
-// Restore completed state visually
-if (task.completed) {
 
-    taskCard.classList.add("completed");
+// ============================================================
+// FILTER
+// ============================================================
 
-}
+let activeFilter = "all";
 
-const checkbox =
-    taskCard.querySelector(".task-checkbox");
-
-
-checkbox.addEventListener("change", async () => {
-
-    const completed =
-        checkbox.checked;
-
-    const result =
-        await handleTaskCompletion(
-            task,
-            taskCard,
-            completed
-        );
-
-    // Firestore update failed
-    if (!result) {
-
-        checkbox.checked =
-            task.completed;
-
-        return;
-
-    }
-
-    // Task was just completed
-    if (result.completedNow) {
-
-        console.log(
-            "Completion event triggered:",
-            task.id
-        );
-
-    }
-
-    // Task was just uncompleted
-    if (result.uncompletedNow) {
-
-        console.log(
-            "Task completion undone:",
-            task.id
-        );
-
-    }
-
-});
-
-// ======================================
-// Task Options Menu
-// ======================================
-
-const menuButton =
-    taskCard.querySelector(".task-menu-btn");
-
-const taskMenu =
-    taskCard.querySelector(".task-menu");
-
-const editButton =
-    taskCard.querySelector(".edit-task-btn");
-
-   editButton.addEventListener("click", () => {
-
-    console.log(
-        "Editing task:",
-        task
-    );
-
-    editingTask = task;
-    editingTaskCard = taskCard;
-
-    document.getElementById(
-    "taskModalTitle"
-).textContent = "Edit Task";
 
 document.getElementById(
-    "taskSubmitBtn"
-).textContent = "Save Changes";
+    "filterBtn"
+).addEventListener(
+    "click",
+    () => {
 
-    taskMenu.classList.remove("show");
+        const filters = [
+            "all",
+            "high",
+            "medium",
+            "low",
+            "completed",
+            "pending"
+        ];
 
 
-    // ===============================
-    // Populate Edit Form
-    // ===============================
+        const index =
+            filters.indexOf(
+                activeFilter
+            );
 
-    document.getElementById("taskTitle").value =
+
+        activeFilter =
+            filters[
+                (index + 1) %
+                filters.length
+            ];
+
+
+        document.getElementById(
+            "filterBtn"
+        ).textContent =
+            `Filter: ${activeFilter}`;
+
+
+        applyFilter();
+    }
+);
+
+
+function applyFilter() {
+
+    let tasks =
+        currentPage === "today"
+            ? getTodayTasks()
+            : allTasks;
+
+
+    if (
+        currentPage ===
+        "important"
+    ) {
+
+        tasks =
+            allTasks.filter(
+                task =>
+                    task.starred
+            );
+    }
+
+
+    if (
+        activeFilter ===
+        "high"
+    ) {
+
+        tasks =
+            tasks.filter(
+                task =>
+                    task.priority ===
+                    "high"
+            );
+    }
+
+
+    if (
+        activeFilter ===
+        "medium"
+    ) {
+
+        tasks =
+            tasks.filter(
+                task =>
+                    task.priority ===
+                    "medium"
+            );
+    }
+
+
+    if (
+        activeFilter ===
+        "low"
+    ) {
+
+        tasks =
+            tasks.filter(
+                task =>
+                    task.priority ===
+                    "low"
+            );
+    }
+
+
+    if (
+        activeFilter ===
+        "completed"
+    ) {
+
+        tasks =
+            tasks.filter(
+                task =>
+                    task.completed
+            );
+    }
+
+
+    if (
+        activeFilter ===
+        "pending"
+    ) {
+
+        tasks =
+            tasks.filter(
+                task =>
+                    !task.completed
+            );
+    }
+
+
+    renderTasks(tasks);
+}
+
+
+// ============================================================
+// RENDER TASKS
+// ============================================================
+
+function renderTasks(tasks) {
+
+    taskList.innerHTML = "";
+
+
+    if (!tasks.length) {
+
+        taskList.innerHTML = `
+            <div class="empty-state">
+                <div>📭</div>
+                <h3>No tasks found</h3>
+                <p>Create a task to get started.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    tasks.forEach(
+        task => {
+
+            taskList.appendChild(
+                createTaskCard(task)
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// CREATE TASK CARD
+// ============================================================
+
+function createTaskCard(task) {
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+
+    card.className =
+        "task-card";
+
+
+    if (task.completed) {
+
+        card.classList.add(
+            "completed"
+        );
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "task-main-row";
+
+
+    // Checkbox
+
+    const check =
+        document.createElement(
+            "input"
+        );
+
+    check.type =
+        "checkbox";
+
+    check.checked =
+        Boolean(task.completed);
+
+
+    check.addEventListener(
+        "change",
+        () =>
+            toggleTaskCompletion(
+                task,
+                check.checked
+            )
+    );
+
+
+    const checkBox =
+        document.createElement(
+            "div"
+        );
+
+    checkBox.className =
+        "task-check";
+
+    checkBox.appendChild(check);
+
+
+    // Information
+
+    const info =
+        document.createElement(
+            "div"
+        );
+
+    info.className =
+        "task-info";
+
+
+    const title =
+        document.createElement(
+            "h3"
+        );
+
+    title.textContent =
+        task.title;
+
+
+    const description =
+        document.createElement(
+            "p"
+        );
+
+    description.textContent =
+        task.description ||
+        "No description added.";
+
+
+    const meta =
+        document.createElement(
+            "div"
+        );
+
+    meta.className =
+        "task-meta";
+
+
+    meta.innerHTML = `
+        <span>
+            ${categoryIcon(task.category)}
+            ${categoryName(task.category)}
+        </span>
+
+        <span>
+            ${priorityIcon(task.priority)}
+            ${task.priority || "Medium"}
+        </span>
+
+        ${
+            task.dueDate
+                ? `<span>📅 ${task.dueDate}</span>`
+                : ""
+        }
+
+        ${
+            task.dueTime
+                ? `<span>⏰ ${formatTime(task.dueTime)}</span>`
+                : ""
+        }
+    `;
+
+
+    info.appendChild(title);
+
+    info.appendChild(description);
+
+    info.appendChild(meta);
+
+
+    // Actions
+
+    const actions =
+        document.createElement(
+            "div"
+        );
+
+    actions.className =
+        "task-actions";
+
+
+    const star =
+        document.createElement(
+            "button"
+        );
+
+    star.type =
+        "button";
+
+    star.className =
+        "star-task-btn";
+
+    star.textContent =
+        task.starred
+            ? "★"
+            : "☆";
+
+
+    if (task.starred) {
+
+        star.classList.add(
+            "important"
+        );
+    }
+
+
+    star.onclick =
+        () =>
+            toggleStar(task);
+
+
+    const edit =
+        document.createElement(
+            "button"
+        );
+
+    edit.type =
+        "button";
+
+    edit.textContent =
+        "✏️";
+
+    edit.title =
+        "Edit";
+
+
+    edit.onclick =
+        () =>
+            openEditTask(task);
+
+
+    const remove =
+        document.createElement(
+            "button"
+        );
+
+    remove.type =
+        "button";
+
+    remove.textContent =
+        "🗑️";
+
+    remove.title =
+        "Delete";
+
+
+    remove.onclick =
+        () =>
+            deleteTask(task);
+
+
+    actions.appendChild(star);
+
+    actions.appendChild(edit);
+
+    actions.appendChild(remove);
+
+
+    row.appendChild(checkBox);
+
+    row.appendChild(info);
+
+    row.appendChild(actions);
+
+
+    card.appendChild(row);
+
+
+    // Subtasks
+
+    if (
+        task.subtasks &&
+        task.subtasks.length
+    ) {
+
+        const subtaskArea =
+            document.createElement(
+                "div"
+            );
+
+        subtaskArea.className =
+            "subtask-section";
+
+
+        const completed =
+            task.subtasks.filter(
+                item =>
+                    item.completed
+            ).length;
+
+
+        subtaskArea.innerHTML = `
+            <div class="subtask-header">
+                <strong>Subtasks</strong>
+                <span>
+                    ${completed} /
+                    ${task.subtasks.length}
+                    completed
+                </span>
+            </div>
+        `;
+
+
+        task.subtasks.forEach(
+            subtask => {
+
+                const label =
+                    document.createElement(
+                        "label"
+                    );
+
+                label.className =
+                    "task-subtask";
+
+
+                if (subtask.completed) {
+
+                    label.classList.add(
+                        "completed"
+                    );
+                }
+
+
+                const subCheck =
+                    document.createElement(
+                        "input"
+                    );
+
+                subCheck.type =
+                    "checkbox";
+
+                subCheck.checked =
+                    Boolean(
+                        subtask.completed
+                    );
+
+
+                subCheck.onchange =
+                    () =>
+                        toggleSubtask(
+                            task,
+                            subtask,
+                            subCheck.checked
+                        );
+
+
+                const text =
+                    document.createElement(
+                        "span"
+                    );
+
+                text.textContent =
+                    subtask.title;
+
+
+                label.appendChild(
+                    subCheck
+                );
+
+                label.appendChild(
+                    text
+                );
+
+
+                subtaskArea.appendChild(
+                    label
+                );
+            }
+        );
+
+
+        card.appendChild(
+            subtaskArea
+        );
+    }
+
+
+    return card;
+}
+
+
+// ============================================================
+// CREATE TASK
+// ============================================================
+
+addTaskBtn.addEventListener(
+    "click",
+    () => {
+
+        editingTask = null;
+
+        subtasks = [];
+
+        taskForm.reset();
+
+        populateCategorySelect();
+
+        document.getElementById(
+            "taskModalTitle"
+        ).textContent =
+            "Create New Task";
+
+
+        document.getElementById(
+            "taskSubmitBtn"
+        ).textContent =
+            "Create Task";
+
+
+        renderSubtaskInputs();
+
+        openModal(taskModal);
+    }
+);
+
+
+// ============================================================
+// SUBTASK INPUT
+// ============================================================
+
+document.getElementById(
+    "addSubtaskBtn"
+).addEventListener(
+    "click",
+    () => {
+
+        const input =
+            document.querySelector(
+                ".subtask-title"
+            );
+
+
+        const value =
+            input.value.trim();
+
+
+        if (!value) {
+            return;
+        }
+
+
+        subtasks.push({
+
+            id:
+                Date.now(),
+
+            title:
+                value,
+
+            completed:
+                false
+        });
+
+
+        input.value = "";
+
+        renderSubtaskInputs();
+
+        input.focus();
+    }
+);
+
+
+function renderSubtaskInputs() {
+
+    const container =
+        document.getElementById(
+            "subtaskInputContainer"
+        );
+
+
+    container.innerHTML = `
+        <div class="subtask-input">
+
+            <input
+                class="subtask-title"
+                type="text"
+                placeholder="Add a subtask..."
+            >
+
+            <button
+                id="addSubtaskBtn"
+                type="button"
+            >
+                + Add
+            </button>
+
+        </div>
+    `;
+
+
+    subtasks.forEach(
+        (subtask, index) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "subtask-item";
+
+
+            item.innerHTML = `
+                <span>☐</span>
+
+                <span>
+                    ${subtask.title}
+                </span>
+
+                <button
+                    type="button"
+                    class="remove-subtask"
+                >
+                    ×
+                </button>
+            `;
+
+
+            item.querySelector(
+                ".remove-subtask"
+            ).onclick =
+                () => {
+
+                    subtasks.splice(
+                        index,
+                        1
+                    );
+
+                    renderSubtaskInputs();
+                };
+
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+
+
+    document.getElementById(
+        "addSubtaskBtn"
+    ).onclick =
+        () => {
+
+            const input =
+                document.querySelector(
+                    ".subtask-title"
+                );
+
+
+            if (!input.value.trim()) {
+                return;
+            }
+
+
+            subtasks.push({
+
+                id:
+                    Date.now(),
+
+                title:
+                    input.value.trim(),
+
+                completed:
+                    false
+            });
+
+
+            renderSubtaskInputs();
+        };
+}
+
+
+// ============================================================
+// TASK SUBMIT
+// ============================================================
+
+taskForm.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+
+        const data = {
+
+            title:
+                document.getElementById(
+                    "taskTitle"
+                ).value.trim(),
+
+            description:
+                document.getElementById(
+                    "taskDescription"
+                ).value.trim(),
+
+            category:
+                document.getElementById(
+                    "taskCategory"
+                ).value,
+
+            priority:
+                document.getElementById(
+                    "taskPriority"
+                ).value,
+
+            dueDate:
+                document.getElementById(
+                    "taskDueDate"
+                ).value,
+
+            dueTime:
+                document.getElementById(
+                    "taskDueTime"
+                ).value,
+
+            reminder:
+                document.getElementById(
+                    "taskReminder"
+                ).value,
+
+            repeat:
+                document.getElementById(
+                    "taskRepeat"
+                ).value,
+
+            subtasks:
+                [...subtasks]
+        };
+
+
+        try {
+
+            if (editingTask) {
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "users",
+                        currentUser.uid,
+                        "tasks",
+                        editingTask.id
+                    ),
+                    data
+                );
+
+
+                Object.assign(
+                    editingTask,
+                    data
+                );
+
+            } else {
+
+                const newTask = {
+
+                    ...data,
+
+                    completed:
+                        false,
+
+                    starred:
+                        false,
+
+                    createdAt:
+                        serverTimestamp()
+                };
+
+
+                const result =
+                    await addDoc(
+                        collection(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks"
+                        ),
+                        newTask
+                    );
+
+
+                newTask.id =
+                    result.id;
+
+
+                allTasks.push(
+                    newTask
+                );
+            }
+
+
+            closeModal(
+                taskModal
+            );
+
+
+            renderPage();
+
+            calculatePoints();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not save task."
+            );
+        }
+    }
+);
+
+
+// ============================================================
+// EDIT TASK
+// ============================================================
+
+function openEditTask(task) {
+
+    editingTask =
+        task;
+
+
+    document.getElementById(
+        "taskTitle"
+    ).value =
         task.title || "";
 
-    document.getElementById("taskDescription").value =
+
+    document.getElementById(
+        "taskDescription"
+    ).value =
         task.description || "";
 
-    document.getElementById("taskCategory").value =
-        task.category || "";
 
-    document.getElementById("taskPriority").value =
-        task.priority || "";
+    populateCategorySelect();
 
-    document.getElementById("taskDueDate").value =
+
+    document.getElementById(
+        "taskCategory"
+    ).value =
+        task.category || "personal";
+
+
+    document.getElementById(
+        "taskPriority"
+    ).value =
+        task.priority || "medium";
+
+
+    document.getElementById(
+        "taskDueDate"
+    ).value =
         task.dueDate || "";
 
-    document.getElementById("taskDueTime").value =
+
+    document.getElementById(
+        "taskDueTime"
+    ).value =
         task.dueTime || "";
 
-    document.getElementById("taskReminder").value =
-        task.reminder || "";
 
-    document.getElementById("taskRepeat").value =
-        task.repeat || "";
+    document.getElementById(
+        "taskReminder"
+    ).value =
+        task.reminder || "none";
 
 
-    // ===============================
-    // Populate Subtasks
-    // ===============================
+    document.getElementById(
+        "taskRepeat"
+    ).value =
+        task.repeat || "none";
+
 
     subtasks =
         task.subtasks
             ? [...task.subtasks]
             : [];
 
-    renderSubtasks();
+
+    renderSubtaskInputs();
 
 
-    // Open modal
-
-    taskModal.classList.add("show");
-
-});
-
-const starButton =
-    taskCard.querySelector(".star-task-btn");
-
-const deleteButton =
-    taskCard.querySelector(".delete-task-btn");
+    document.getElementById(
+        "taskModalTitle"
+    ).textContent =
+        "Edit Task";
 
 
-// Open / close menu
-
-menuButton.addEventListener("click", (event) => {
-
-    event.stopPropagation();
-
-    const isOpening =
-        !taskMenu.classList.contains("show");
+    document.getElementById(
+        "taskSubmitBtn"
+    ).textContent =
+        "Save Changes";
 
 
-    // Close other open menus
-
-    document
-        .querySelectorAll(".task-menu.show")
-        .forEach((menu) => {
-
-            menu.classList.remove("show");
-
-            const card =
-                menu.closest(".task-card");
-
-            if (card) {
-                card.classList.remove("menu-open");
-            }
-
-        });
+    openModal(taskModal);
+}
 
 
-    if (isOpening) {
+// ============================================================
+// DELETE
+// ============================================================
 
-        taskMenu.classList.add("show");
+async function deleteTask(task) {
 
-        taskCard.classList.add("menu-open");
-
-    }
-
-});
-
-
-// Close menu when clicking elsewhere
-
-document.addEventListener("click", () => {
-
-    taskMenu.classList.remove("show");
-
-    taskCard.classList.remove("menu-open");
-
-});
-
-
-// ======================================
-// Mark Important
-// ======================================
-
-starButton.addEventListener("click", async () => {
-
-    const user = auth.currentUser;
-
-    if (!user) {
-
-        console.error(
-            "No authenticated user."
-        );
-
+    if (
+        !confirm(
+            `Delete "${task.title}"?`
+        )
+    ) {
         return;
-
     }
 
-    const newStarState =
-        !task.starred;
 
     try {
 
-        const taskRef = doc(
-            db,
-            "users",
-            user.uid,
-            "tasks",
-            task.id
+        await deleteDoc(
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            )
         );
 
-        await updateDoc(
-            taskRef,
-            {
-                starred: newStarState
-            }
-        );
 
-        task.starred =
-            newStarState;
+        allTasks =
+            allTasks.filter(
+                item =>
+                    item.id !==
+                    task.id
+            );
 
-        starButton.textContent =
-    task.starred ? "★" : "☆";
 
-starButton.classList.toggle(
-    "important",
-    task.starred
-);
+        renderPage();
 
-starButton.title =
-    task.starred
-        ? "Unmark important"
-        : "Mark important";
-
-        console.log(
-            "Task importance saved:",
-            task.starred
-        );
+        calculatePoints();
 
     } catch (error) {
 
-        console.error(
-            "Failed to update importance:",
-            error
+        console.error(error);
+
+        alert(
+            "Could not delete task."
         );
-
     }
-
-});
-
-
-// ======================================
-// Delete Task
-// ======================================
-
-deleteButton.addEventListener(
-    "click",
-    async () => {
-
-        const confirmed =
-            confirm(
-                `Delete "${task.title}"?`
-            );
-
-        if (!confirmed) {
-            return;
-        }
-
-        try {
-
-            const user =
-                auth.currentUser;
-
-            if (!user) {
-
-                console.error(
-                    "No authenticated user."
-                );
-
-                return;
-
-            }
-
-            const taskRef = doc(
-                db,
-                "users",
-                user.uid,
-                "tasks",
-                task.id
-            );
-
-            await deleteDoc(taskRef);
-
-            taskCard.remove();
-
-            updateProgress();
-            updateTaskCount();
-
-            console.log(
-                "Task deleted from Firestore:",
-                task
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Failed to delete task:",
-                error
-            );
-
-            alert(
-                "Unable to delete this task. Please try again."
-            );
-
-        }
-
-    }
-);
-
-
-
 }
 
-function renderTaskSubtasks(
+
+// ============================================================
+// COMPLETE TASK
+// ============================================================
+
+async function toggleTaskCompletion(
     task,
-    subtaskSection
-) {
-
-    const subtaskList =
-        subtaskSection.querySelector(
-            ".subtask-list"
-        );
-
-    const subtaskProgress =
-        subtaskSection.querySelector(
-            ".subtask-progress"
-        );
-
-    subtaskList.innerHTML = "";
-
-    const taskSubtasks =
-        task.subtasks || [];
-
-    let completedCount = 0;
-
-
-    taskSubtasks.forEach((subtask) => {
-
-        if (subtask.completed) {
-            completedCount++;
-        }
-
-
-        const subtaskItem =
-            document.createElement("label");
-
-        subtaskItem.className =
-    `task-subtask ${
-        subtask.completed
-            ? "completed"
-            : ""
-    }`;
-
-
-        subtaskItem.innerHTML = `
-
-    <input
-        type="checkbox"
-        class="subtask-checkbox"
-        ${subtask.completed ? "checked" : ""}
-    >
-
-    <span class="subtask-title">
-        ${subtask.title}
-    </span>
-
-`;
-
-
-        const checkbox =
-            subtaskItem.querySelector(
-                ".subtask-checkbox"
-            );
-
-
-        checkbox.addEventListener(
-    "change",
-    async (event) => {
-
-        event.stopPropagation();
-
-        const previousState =
-            subtask.completed;
-
-        subtask.completed =
-            checkbox.checked;
-
-
-        try {
-
-            const user =
-                auth.currentUser;
-
-            if (!user) {
-
-                subtask.completed =
-                    previousState;
-
-                checkbox.checked =
-                    previousState;
-
-                return;
-
-            }
-
-
-            // ======================================
-            // Check whether ALL subtasks are complete
-            // ======================================
-
-            const allSubtasksCompleted =
-                taskSubtasks.length > 0 &&
-                taskSubtasks.every(
-                    (item) => item.completed
-                );
-
-
-            // ======================================
-            // Main task follows subtask completion
-            // ======================================
-
-            const newTaskCompleted =
-                allSubtasksCompleted;
-
-
-            const taskRef = doc(
-                db,
-                "users",
-                user.uid,
-                "tasks",
-                task.id
-            );
-
-
-            // ======================================
-            // Save BOTH to Firebase
-            // ======================================
-
-            await updateDoc(
-                taskRef,
-                {
-
-                    completed:
-                        newTaskCompleted,
-
-                    subtasks:
-                        taskSubtasks
-
-                }
-            );
-
-
-            // ======================================
-            // Update local task
-            // ======================================
-
-            task.completed =
-                newTaskCompleted;
-
-            task.subtasks =
-                taskSubtasks;
-
-
-            // ======================================
-            // Update main task UI
-            // ======================================
-
-            const taskCard =
-                subtaskSection.closest(
-                    ".task-card"
-                );
-
-            const mainTaskCheckbox =
-    taskCard.querySelector(
-        ".task-checkbox"
-    );
-
-if (mainTaskCheckbox) {
-
-    mainTaskCheckbox.checked =
-        newTaskCompleted;
-
-}
-
-
-            if (taskCard) {
-
-                taskCard.classList.toggle(
-                    "completed",
-                    newTaskCompleted
-                );
-
-            }
-
-
-            // ======================================
-            // Update subtask counter
-            // ======================================
-
-            let completedCount = 0;
-
-            taskSubtasks.forEach(
-                (item) => {
-
-                    if (item.completed) {
-                        completedCount++;
-                    }
-
-                }
-            );
-
-
-            subtaskProgress.textContent =
-                `${completedCount} / ${taskSubtasks.length} completed`;
-
-
-            // ======================================
-            // Update subtask visual state
-            // ======================================
-
-            subtaskItem.classList.toggle(
-                "completed",
-                subtask.completed
-            );
-
-
-            // ======================================
-            // Update Today's Progress
-            // ======================================
-
-            updateProgress();
-
-
-            console.log(
-                "Subtask saved to Firebase:",
-                subtask
-            );
-
-            console.log(
-                "Main task completion:",
-                newTaskCompleted
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Failed to save subtask:",
-                error
-            );
-
-
-            // Restore previous state
-
-            subtask.completed =
-                previousState;
-
-            checkbox.checked =
-                previousState;
-
-        }
-
-    }
-);
-
-
-        subtaskList.appendChild(
-            subtaskItem
-        );
-
-    });
-
-
-    subtaskProgress.textContent =
-        `${completedCount} / ${taskSubtasks.length} completed`;
-
-}
-
-// ======================================
-// Category Formatting
-// ======================================
-
-function getCategoryIcon(category) {
-
-    const icons = {
-
-        personal: "👤",
-
-        work: "💼",
-
-        study: "📚",
-
-        fitness: "🏋️"
-
-    };
-
-    return icons[category] || "📁";
-
-}
-
-
-function formatCategory(category) {
-
-    const categories = {
-
-        personal: "Personal",
-
-        work: "Work",
-
-        study: "Study",
-
-        fitness: "Fitness"
-
-    };
-
-    return categories[category] || category;
-
-}
-
-
-// ======================================
-// Priority Formatting
-// ======================================
-
-function formatPriority(priority) {
-
-    const priorities = {
-
-        low: "Low",
-
-        medium: "Medium",
-
-        high: "High"
-
-    };
-
-    return priorities[priority] || priority;
-
-}
-
-
-function getPriorityIcon(priority) {
-
-    const icons = {
-
-        low: "🟢",
-
-        medium: "🟡",
-
-        high: "🔴"
-
-    };
-
-    return icons[priority] || "⚪";
-
-}
-
-function formatTime(time) {
-
-    if (!time) {
-        return "";
-    }
-
-    const [hours, minutes] = time.split(":");
-
-    const date = new Date();
-
-    date.setHours(
-        Number(hours),
-        Number(minutes)
-    );
-
-    return date.toLocaleTimeString(
-        "en-US",
-        {
-            hour: "numeric",
-            minute: "2-digit"
-        }
-    );
-
-}
-
-// ======================================
-// Task Progress
-// ======================================
-
-function updateProgress() {
-
-    const tasks =
-        document.querySelectorAll(".task-card");
-
-    const completedTasks =
-        document.querySelectorAll(
-            ".task-card.completed"
-        );
-
-    const total =
-        tasks.length;
-
-    const completed =
-        completedTasks.length;
-
-
-    // Update text
-
-    const progressText =
-        document.getElementById("progressText");
-
-    if (progressText) {
-
-        progressText.textContent =
-            `${completed} / ${total} completed`;
-
-    }
-
-
-    // Calculate percentage
-
-    let percentage = 0;
-
-    if (total > 0) {
-
-        percentage =
-            (completed / total) * 100;
-
-    }
-
-
-    // Update progress bar
-
-    const progressFill =
-        document.getElementById("progressFill");
-
-    if (progressFill) {
-
-        progressFill.style.width =
-            `${percentage}%`;
-
-    }
-
-}
-
-// ======================================
-// Existing Task Checkboxes
-// ======================================
-
-function setupExistingTaskCheckboxes() {
-
-    const taskCards =
-        document.querySelectorAll(".task-card");
-
-
-    taskCards.forEach((taskCard) => {
-
-        const checkbox =
-            taskCard.querySelector(".task-checkbox");
-
-
-        if (!checkbox) {
-            return;
-        }
-
-
-        checkbox.addEventListener("change", () => {
-
-            taskCard.classList.toggle(
-                "completed",
-                checkbox.checked
-            );
-
-
-            console.log(
-                "Existing task completed:",
-                checkbox.checked
-            );
-
-
-            updateProgress();
-
-        });
-
-    });
-
-}
-
-setupExistingTaskCheckboxes();
-
-updateProgress();
-
-// ======================================
-// Task Count
-// ======================================
-
-function updateTaskCount() {
-
-    const taskCards =
-        document.querySelectorAll(".task-card");
-
-    const taskCount =
-        taskCards.length;
-
-    const taskCountText =
-        document.getElementById("taskCountText");
-
-    if (!taskCountText) {
-        return;
-    }
-
-    if (taskCount === 1) {
-
-        taskCountText.textContent =
-            "You have 1 task planned for today.";
-
-    } else {
-
-        taskCountText.textContent =
-            `You have ${taskCount} tasks planned for today.`;
-
-    }
-
-}
-
-updateTaskCount();
-
-
-// ======================================
-// Load Tasks From Firestore
-// ======================================
-
-async function loadTasks() {
-
-    const user = auth.currentUser;
-
-    if (!user) {
-
-        console.error(
-            "No authenticated user."
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const tasksCollection =
-            collection(
-                db,
-                "users",
-                user.uid,
-                "tasks"
-            );
-
-        const snapshot =
-            await getDocs(tasksCollection);
-
-        snapshot.forEach((doc) => {
-
-            const task = {
-
-                id: doc.id,
-
-                ...doc.data()
-
-            };
-
-            console.log(
-                "Task loaded:",
-                task
-            );
-
-            addTaskToUI(task);
-
-        });
-
-        // Update dashboard after Firestore tasks are loaded
-        updateProgress();
-        updateTaskCount();
-
-    } catch (error) {
-
-        console.error(
-            "Failed to load tasks:",
-            error
-        );
-
-    }
-
-}
-
-
-// ======================================
-// Task Completion
-// ======================================
-
-async function handleTaskCompletion(
-    task,
-    taskCard,
     completed
 ) {
 
-    const user = auth.currentUser;
-
-    const wasCompleted =
-        task.completed;
-
-    if (!user) {
-
-        console.error(
-            "No authenticated user."
-        );
-
-        return false;
-
-    }
-
     try {
 
-        const taskRef = doc(
-            db,
-            "users",
-            user.uid,
-            "tasks",
-            task.id
-        );
-
-
-        // Sync every subtask with the main task
-
         const updatedSubtasks =
-            (task.subtasks || []).map(
-                (subtask) => ({
+            (task.subtasks || [])
+                .map(
+                    item => ({
+                        ...item,
+                        completed
+                    })
+                );
 
-                    ...subtask,
-
-                    completed: completed
-
-                })
-            );
-
-
-        // Save main task + subtasks
 
         await updateDoc(
-            taskRef,
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            ),
             {
-
-                completed: completed,
-
-                subtasks: updatedSubtasks
-
+                completed,
+                subtasks:
+                    updatedSubtasks
             }
         );
 
-
-        // Update local data
 
         task.completed =
             completed;
@@ -1954,69 +1741,1624 @@ async function handleTaskCompletion(
             updatedSubtasks;
 
 
-        // Update main task appearance
+        renderPage();
 
-        taskCard.classList.toggle(
-            "completed",
-            completed
+        calculatePoints();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not update task."
+        );
+    }
+}
+
+
+// ============================================================
+// SUBTASK
+// ============================================================
+
+async function toggleSubtask(
+    task,
+    subtask,
+    completed
+) {
+
+    subtask.completed =
+        completed;
+
+
+    const allCompleted =
+        task.subtasks.length > 0 &&
+        task.subtasks.every(
+            item =>
+                item.completed
         );
 
 
-        // Update visible subtasks
+    task.completed =
+        allCompleted;
 
-        const subtaskSection =
-            taskCard.querySelector(
-                ".subtask-section"
+
+    try {
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            ),
+            {
+                completed:
+                    allCompleted,
+
+                subtasks:
+                    task.subtasks
+            }
+        );
+
+
+        renderPage();
+
+        calculatePoints();
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+
+// ============================================================
+// STAR
+// ============================================================
+
+async function toggleStar(task) {
+
+    const value =
+        !task.starred;
+
+
+    try {
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            ),
+            {
+                starred:
+                    value
+            }
+        );
+
+
+        task.starred =
+            value;
+
+
+        renderPage();
+
+    } catch (error) {
+
+        console.error(error);
+    }
+}
+
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function updateTodayProgress() {
+
+    const tasks =
+        getTodayTasks();
+
+
+    const completed =
+        tasks.filter(
+            task =>
+                task.completed
+        ).length;
+
+
+    const total =
+        tasks.length;
+
+
+    document.getElementById(
+        "progressText"
+    ).textContent =
+        `${completed} / ${total} completed`;
+
+
+    const percentage =
+        total
+            ? (completed / total) * 100
+            : 0;
+
+
+    document.getElementById(
+        "progressFill"
+    ).style.width =
+        `${percentage}%`;
+}
+
+
+function updateTaskCount() {
+
+    const tasks =
+        getTodayTasks();
+
+
+    const count =
+        tasks.length;
+
+
+    document.getElementById(
+        "taskCountText"
+    ).textContent =
+        count === 1
+            ? "You have 1 task planned for today."
+            : `You have ${count} tasks planned for today.`;
+}
+
+
+// ============================================================
+// CALENDAR
+// ============================================================
+
+document.getElementById(
+    "prevMonthBtn"
+).onclick =
+    () => {
+
+        calendarDate.setMonth(
+            calendarDate.getMonth() - 1
+        );
+
+        renderCalendar();
+    };
+
+
+document.getElementById(
+    "nextMonthBtn"
+).onclick =
+    () => {
+
+        calendarDate.setMonth(
+            calendarDate.getMonth() + 1
+        );
+
+        renderCalendar();
+    };
+
+
+function renderCalendar() {
+
+    const year =
+        calendarDate.getFullYear();
+
+    const month =
+        calendarDate.getMonth();
+
+
+    document.getElementById(
+        "calendarMonth"
+    ).textContent =
+        calendarDate.toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    const grid =
+        document.getElementById(
+            "calendarGrid"
+        );
+
+
+    grid.innerHTML = "";
+
+
+    [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+    ]
+        .forEach(
+            day => {
+
+                const header =
+                    document.createElement(
+                        "div"
+                    );
+
+                header.className =
+                    "calendar-day-name";
+
+                header.textContent =
+                    day;
+
+                grid.appendChild(
+                    header
+                );
+            }
+        );
+
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        ).getDay();
+
+
+    const daysInMonth =
+        new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+
+    for (
+        let i = 0;
+        i < firstDay;
+        i++
+    ) {
+
+        grid.appendChild(
+            document.createElement(
+                "div"
+            )
+        );
+    }
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const cell =
+            document.createElement(
+                "button"
             );
 
-        if (subtaskSection) {
 
-            renderTaskSubtasks(
-                task,
-                subtaskSection
+        cell.type =
+            "button";
+
+        cell.className =
+            "calendar-cell";
+
+
+        const dateString =
+            `${year}-${String(
+                month + 1
+            ).padStart(2, "0")}-${String(
+                day
+            ).padStart(2, "0")}`;
+
+
+        cell.innerHTML = `
+            <strong>${day}</strong>
+        `;
+
+
+        const tasks =
+            allTasks.filter(
+                task =>
+                    task.dueDate ===
+                    dateString
             );
 
+
+        if (tasks.length) {
+
+            cell.innerHTML += `
+                <span class="calendar-count">
+                    ${tasks.length} task${tasks.length > 1 ? "s" : ""}
+                </span>
+            `;
         }
 
 
-        // Progress still counts ONLY main tasks
+        cell.onclick =
+            () => {
 
-        updateProgress();
+                selectedCalendarDate =
+                    dateString;
+
+                showCalendarTasks(
+                    dateString
+                );
+            };
 
 
-        console.log(
-            "Task completion saved:",
-            completed
+        grid.appendChild(
+            cell
+        );
+    }
+
+
+    document.getElementById(
+        "calendarTasks"
+    ).innerHTML = `
+        <div class="empty-state">
+            Select a date to see tasks.
+        </div>
+    `;
+}
+
+
+function showCalendarTasks(date) {
+
+    const tasks =
+        allTasks.filter(
+            task =>
+                task.dueDate ===
+                date
         );
 
-        console.log(
-            "Subtasks synchronized:",
-            updatedSubtasks
+
+    const container =
+        document.getElementById(
+            "calendarTasks"
         );
 
 
-        return {
+    container.innerHTML = `
+        <h3>
+            Tasks for ${date}
+        </h3>
+    `;
 
-            success: true,
 
-            completedNow:
-                !wasCompleted && completed,
+    if (!tasks.length) {
 
-            uncompletedNow:
-                wasCompleted && !completed
+        container.innerHTML += `
+            <p>No tasks for this date.</p>
+        `;
 
+        return;
+    }
+
+
+    tasks.forEach(
+        task => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "calendar-task-item";
+
+
+            item.innerHTML = `
+                <strong>
+                    ${task.completed ? "✅" : "⬜"}
+                    ${task.title}
+                </strong>
+
+                <span>
+                    ${task.dueTime || "No time"}
+                </span>
+            `;
+
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// GOALS
+// ============================================================
+
+document.getElementById(
+    "addGoalBtn"
+).onclick =
+    () =>
+        openModal(
+            document.getElementById(
+                "goalModal"
+            )
+        );
+
+
+document.getElementById(
+    "closeGoalModalBtn"
+).onclick =
+    () =>
+        closeModal(
+            document.getElementById(
+                "goalModal"
+            )
+        );
+
+
+document.getElementById(
+    "cancelGoalBtn"
+).onclick =
+    () =>
+        closeModal(
+            document.getElementById(
+                "goalModal"
+            )
+        );
+
+
+document.getElementById(
+    "goalForm"
+).addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+
+        const goal = {
+
+            title:
+                document.getElementById(
+                    "goalTitle"
+                ).value.trim(),
+
+            target:
+                Number(
+                    document.getElementById(
+                        "goalTarget"
+                    ).value
+                ),
+
+            progress:
+                0,
+
+            createdAt:
+                serverTimestamp()
         };
 
+
+        try {
+
+            const result =
+                await addDoc(
+                    collection(
+                        db,
+                        "users",
+                        currentUser.uid,
+                        "goals"
+                    ),
+                    goal
+                );
+
+
+            goal.id =
+                result.id;
+
+
+            allGoals.push(
+                goal
+            );
+
+
+            event.target.reset();
+
+            closeModal(
+                document.getElementById(
+                    "goalModal"
+                )
+            );
+
+
+            renderGoals();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not create goal."
+            );
+        }
+    }
+);
+
+
+async function loadGoals() {
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "goals"
+                )
+            );
+
+
+        allGoals = [];
+
+
+        snapshot.forEach(
+            item => {
+
+                allGoals.push({
+
+                    id:
+                        item.id,
+
+                    ...item.data()
+                });
+            }
+        );
 
     } catch (error) {
 
         console.error(
-            "Failed to update task completion:",
+            "Goals error:",
             error
         );
+    }
+}
 
-        return false;
 
+function renderGoals() {
+
+    const container =
+        document.getElementById(
+            "goalList"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!allGoals.length) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                🎯
+                <h3>No goals yet</h3>
+                <p>Create your first goal.</p>
+            </div>
+        `;
+
+        return;
     }
 
+
+    allGoals.forEach(
+        goal => {
+
+            const percentage =
+                Math.min(
+                    100,
+                    ((goal.progress || 0) /
+                        goal.target) *
+                        100
+                );
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "goal-card";
+
+
+            card.innerHTML = `
+                <div class="goal-header">
+
+                    <div>
+                        <h3>
+                            ${goal.title}
+                        </h3>
+
+                        <p>
+                            ${goal.progress || 0}
+                            / ${goal.target}
+                        </p>
+                    </div>
+
+                    <button
+                        class="delete-goal"
+                        type="button"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        style="width:${percentage}%"
+                    ></div>
+                </div>
+
+                <button
+                    class="goal-progress-btn"
+                    type="button"
+                >
+                    +1 Progress
+                </button>
+            `;
+
+
+            card.querySelector(
+                ".goal-progress-btn"
+            ).onclick =
+                async () => {
+
+                    if (
+                        goal.progress >=
+                        goal.target
+                    ) {
+                        return;
+                    }
+
+
+                    goal.progress =
+                        (goal.progress || 0) + 1;
+
+
+                    await updateDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "goals",
+                            goal.id
+                        ),
+                        {
+                            progress:
+                                goal.progress
+                        }
+                    );
+
+
+                    renderGoals();
+                };
+
+
+            card.querySelector(
+                ".delete-goal"
+            ).onclick =
+                async () => {
+
+                    if (
+                        !confirm(
+                            "Delete this goal?"
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "goals",
+                            goal.id
+                        )
+                    );
+
+
+                    allGoals =
+                        allGoals.filter(
+                            item =>
+                                item.id !==
+                                goal.id
+                        );
+
+
+                    renderGoals();
+                };
+
+
+            container.appendChild(
+                card
+            );
+        }
+    );
 }
+
+
+// ============================================================
+// PROGRESS PAGE
+// ============================================================
+
+function renderProgress() {
+
+    const total =
+        allTasks.length;
+
+
+    const completed =
+        allTasks.filter(
+            task =>
+                task.completed
+        ).length;
+
+
+    const pending =
+        total - completed;
+
+
+    const important =
+        allTasks.filter(
+            task =>
+                task.starred
+        ).length;
+
+
+    const percentage =
+        total
+            ? Math.round(
+                completed /
+                total *
+                100
+            )
+            : 0;
+
+
+    document.getElementById(
+        "statisticsContainer"
+    ).innerHTML = `
+
+        <div class="stat-box">
+            <span>📋</span>
+            <strong>${total}</strong>
+            <small>Total Tasks</small>
+        </div>
+
+        <div class="stat-box">
+            <span>✅</span>
+            <strong>${completed}</strong>
+            <small>Completed</small>
+        </div>
+
+        <div class="stat-box">
+            <span>⏳</span>
+            <strong>${pending}</strong>
+            <small>Pending</small>
+        </div>
+
+        <div class="stat-box">
+            <span>⭐</span>
+            <strong>${important}</strong>
+            <small>Important</small>
+        </div>
+
+        <div class="stat-box">
+            <span>📈</span>
+            <strong>${percentage}%</strong>
+            <small>Completion Rate</small>
+        </div>
+
+    `;
+
+
+    const categoryContainer =
+        document.getElementById(
+            "categoryProgress"
+        );
+
+
+    categoryContainer.innerHTML =
+        "<h3>Category Progress</h3>";
+
+
+    categories.forEach(
+        category => {
+
+            const tasks =
+                allTasks.filter(
+                    task =>
+                        task.category ===
+                        category.id
+                );
+
+
+            const done =
+                tasks.filter(
+                    task =>
+                        task.completed
+                ).length;
+
+
+            const percent =
+                tasks.length
+                    ? done /
+                        tasks.length *
+                        100
+                    : 0;
+
+
+            categoryContainer.innerHTML += `
+
+                <div class="category-progress-row">
+
+                    <div>
+                        ${category.icon}
+                        ${category.name}
+                    </div>
+
+                    <strong>
+                        ${done}/${tasks.length}
+                    </strong>
+
+                    <div class="progress-bar">
+                        <div
+                            class="progress-fill"
+                            style="width:${percent}%"
+                        ></div>
+                    </div>
+
+                </div>
+            `;
+        }
+    );
+}
+
+
+// ============================================================
+// FOCUS TIMER
+// ============================================================
+
+let timerSeconds = 25 * 60;
+
+let timerInterval = null;
+
+let focusRunning = false;
+
+
+function updateTimerDisplay() {
+
+    const minutes =
+        Math.floor(
+            timerSeconds / 60
+        );
+
+    const seconds =
+        timerSeconds % 60;
+
+
+    document.getElementById(
+        "timerDisplay"
+    ).textContent =
+        `${String(minutes).padStart(2, "0")}:${String(
+            seconds
+        ).padStart(2, "0")}`;
+}
+
+
+document.getElementById(
+    "startTimerBtn"
+).onclick =
+    () => {
+
+        if (focusRunning) {
+            return;
+        }
+
+
+        focusRunning =
+            true;
+
+
+        timerInterval =
+            setInterval(
+                () => {
+
+                    timerSeconds--;
+
+                    updateTimerDisplay();
+
+
+                    if (
+                        timerSeconds <=
+                        0
+                    ) {
+
+                        clearInterval(
+                            timerInterval
+                        );
+
+                        focusRunning =
+                            false;
+
+                        alert(
+                            "Focus session completed! 🎉"
+                        );
+
+                        timerSeconds =
+                            5 * 60;
+
+                        document.getElementById(
+                            "focusMode"
+                        ).textContent =
+                            "Break Time";
+
+                        updateTimerDisplay();
+                    }
+
+                },
+                1000
+            );
+    };
+
+
+document.getElementById(
+    "pauseTimerBtn"
+).onclick =
+    () => {
+
+        clearInterval(
+            timerInterval
+        );
+
+        focusRunning =
+            false;
+    };
+
+
+document.getElementById(
+    "resetTimerBtn"
+).onclick =
+    () => {
+
+        clearInterval(
+            timerInterval
+        );
+
+        focusRunning =
+            false;
+
+        timerSeconds =
+            25 * 60;
+
+        document.getElementById(
+            "focusMode"
+        ).textContent =
+            "Focus Time";
+
+        updateTimerDisplay();
+    };
+
+
+updateTimerDisplay();
+
+
+// ============================================================
+// CATEGORIES
+// ============================================================
+
+async function loadCategories() {
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "categories"
+                )
+            );
+
+
+        snapshot.forEach(
+            item => {
+
+                const data =
+                    item.data();
+
+
+                if (
+                    !categories.some(
+                        category =>
+                            category.id ===
+                            item.id
+                    )
+                ) {
+
+                    categories.push({
+
+                        id:
+                            item.id,
+
+                        name:
+                            data.name,
+
+                        icon:
+                            data.icon ||
+                            "📁"
+                    });
+                }
+            }
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Using default categories."
+        );
+    }
+}
+
+
+function populateCategorySelect() {
+
+    const select =
+        document.getElementById(
+            "taskCategory"
+        );
+
+
+    select.innerHTML = "";
+
+
+    categories.forEach(
+        category => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                category.id;
+
+            option.textContent =
+                `${category.icon} ${category.name}`;
+
+
+            select.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+document.getElementById(
+    "addCategoryBtn"
+).onclick =
+    async () => {
+
+        const input =
+            document.getElementById(
+                "newCategoryInput"
+            );
+
+
+        const name =
+            input.value.trim();
+
+
+        if (!name) {
+            return;
+        }
+
+
+        const id =
+            name
+                .toLowerCase()
+                .replace(
+                    /[^a-z0-9]+/g,
+                    "-"
+                );
+
+
+        if (
+            categories.some(
+                category =>
+                    category.id === id
+            )
+        ) {
+
+            alert(
+                "Category already exists."
+            );
+
+            return;
+        }
+
+
+        try {
+
+            await addDoc(
+                collection(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "categories"
+                ),
+                {
+                    name,
+                    icon: "📁"
+                }
+            );
+
+
+            categories.push({
+
+                id,
+
+                name,
+
+                icon: "📁"
+            });
+
+
+            input.value = "";
+
+            populateCategorySelect();
+
+            renderCategories();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not create category."
+            );
+        }
+    };
+
+
+function renderCategories() {
+
+    const container =
+        document.getElementById(
+            "categoryList"
+        );
+
+
+    container.innerHTML = "";
+
+
+    categories.forEach(
+        category => {
+
+            const taskCount =
+                allTasks.filter(
+                    task =>
+                        task.category ===
+                        category.id
+                ).length;
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "category-card";
+
+
+            item.innerHTML = `
+
+                <div>
+                    <span class="category-icon">
+                        ${category.icon}
+                    </span>
+
+                    <strong>
+                        ${category.name}
+                    </strong>
+
+                    <small>
+                        ${taskCount} task${taskCount !== 1 ? "s" : ""}
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="category-open-btn"
+                >
+                    View
+                </button>
+            `;
+
+
+            item.querySelector(
+                ".category-open-btn"
+            ).onclick =
+                () => {
+
+                    currentPage =
+                        "all-tasks";
+
+
+                    document
+                        .querySelectorAll(
+                            ".nav-item[data-page]"
+                        )
+                        .forEach(
+                            nav =>
+                                nav.classList.toggle(
+                                    "active",
+                                    nav.dataset.page ===
+                                        "all-tasks"
+                                )
+                        );
+
+
+                    pageTitle.textContent =
+                        `${category.name} Tasks`;
+
+
+                    document.getElementById(
+                        "taskView"
+                    ).hidden =
+                        false;
+
+
+                    document
+                        .querySelectorAll(
+                            ".page-view"
+                        )
+                        .forEach(
+                            view =>
+                                view.hidden =
+                                    true
+                        );
+
+
+                    renderTasks(
+                        allTasks.filter(
+                            task =>
+                                task.category ===
+                                category.id
+                        )
+                    );
+                };
+
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// CATEGORY HELPERS
+// ============================================================
+
+function categoryName(id) {
+
+    const category =
+        categories.find(
+            item =>
+                item.id === id
+        );
+
+
+    return category
+        ? category.name
+        : "Other";
+}
+
+
+function categoryIcon(id) {
+
+    const category =
+        categories.find(
+            item =>
+                item.id === id
+        );
+
+
+    return category
+        ? category.icon
+        : "📁";
+}
+
+
+function priorityIcon(priority) {
+
+    if (
+        priority ===
+        "high"
+    ) {
+        return "🔴";
+    }
+
+    if (
+        priority ===
+        "low"
+    ) {
+        return "🟢";
+    }
+
+    return "🟡";
+}
+
+
+function formatTime(time) {
+
+    if (!time) {
+        return "";
+    }
+
+
+    const parts =
+        time.split(":");
+
+
+    const date =
+        new Date();
+
+
+    date.setHours(
+        Number(parts[0]),
+        Number(parts[1])
+    );
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+}
+
+
+// ============================================================
+// POINTS
+// ============================================================
+
+function calculatePoints() {
+
+    const completed =
+        allTasks.filter(
+            task =>
+                task.completed
+        ).length;
+
+
+    const points =
+        completed * 10;
+
+
+    document.getElementById(
+        "pointsValue"
+    ).textContent =
+        points.toLocaleString();
+}
+
+
+// ============================================================
+// MODAL
+// ============================================================
+
+function openModal(modal) {
+
+    modal.hidden =
+        false;
+
+    modal.classList.add(
+        "show"
+    );
+}
+
+
+function closeModal(modal) {
+
+    modal.classList.remove(
+        "show"
+    );
+
+    modal.hidden =
+        true;
+}
+
+
+document.getElementById(
+    "closeModalBtn"
+).onclick =
+    () =>
+        closeModal(taskModal);
+
+
+document.getElementById(
+    "cancelTaskBtn"
+).onclick =
+    () =>
+        closeModal(taskModal);
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            closeModal(taskModal);
+
+            closeModal(
+                document.getElementById(
+                    "goalModal"
+                )
+            );
+        }
+    }
+);
+
+
+// ============================================================
+// REMINDERS
+// ============================================================
+
+async function requestNotificationPermission() {
+
+    if (
+        "Notification" in window &&
+        Notification.permission ===
+            "default"
+    ) {
+
+        try {
+
+            await Notification.requestPermission();
+
+        } catch (error) {
+
+            console.log(
+                "Notification permission not available."
+            );
+        }
+    }
+}
+
+
+function setupReminderChecker() {
+
+    setInterval(
+        checkReminders,
+        30000
+    );
+
+    checkReminders();
+}
+
+
+function checkReminders() {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !==
+            "granted"
+    ) {
+        return;
+    }
+
+
+    const now =
+        new Date();
+
+
+    allTasks.forEach(
+        task => {
+
+            if (
+                !task.dueDate ||
+                !task.dueTime ||
+                task.reminder ===
+                    "none" ||
+                task.completed
+            ) {
+                return;
+            }
+
+
+            const due =
+                new Date(
+                    `${task.dueDate}T${task.dueTime}`
+                );
+
+
+            const reminderMinutes =
+                Number(
+                    task.reminder
+                );
+
+
+            const reminderTime =
+                due.getTime() -
+                reminderMinutes *
+                    60 *
+                    1000;
+
+
+            const difference =
+                now.getTime() -
+                reminderTime;
+
+
+            if (
+                difference >= 0 &&
+                difference < 60000
+            ) {
+
+                const key =
+                    `reminder-${task.id}-${task.dueDate}-${task.dueTime}`;
+
+
+                if (
+                    !sessionStorage.getItem(
+                        key
+                    )
+                ) {
+
+                    new Notification(
+                        "To-Do Flow Reminder",
+                        {
+                            body:
+                                task.title
+                        }
+                    );
+
+
+                    sessionStorage.setItem(
+                        key,
+                        "sent"
+                    );
+                }
+            }
+        }
+    );
+}
+
+
+// ============================================================
+// INITIAL
+// ============================================================
+
+renderPage();

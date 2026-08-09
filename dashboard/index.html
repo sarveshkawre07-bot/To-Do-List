@@ -1,5 +1,3 @@
-<!--index.html-->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,250 +12,509 @@
 
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <!-- ================= SIDEBAR ================= -->
+    <!-- ================= SIDEBAR ================= -->
 
-        <aside class="sidebar">
+    <aside class="sidebar">
 
-            <div class="logo">
-                <span class="logo-icon">✓</span>
-                <span>To-Do Flow</span>
+        <div class="logo">
+            <span class="logo-icon">✓</span>
+            <span>To-Do Flow</span>
+        </div>
+
+        <nav class="navigation">
+
+            <p class="nav-title">MAIN</p>
+
+            <a href="#" class="nav-item active" data-page="today">
+                <span>🏠</span>
+                <span>Today</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="all-tasks">
+                <span>📋</span>
+                <span>All Tasks</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="important">
+                <span>⭐</span>
+                <span>Important</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="calendar">
+                <span>📅</span>
+                <span>Calendar</span>
+            </a>
+
+            <p class="nav-title">PRODUCTIVITY</p>
+
+            <a href="#" class="nav-item" data-page="goals">
+                <span>🎯</span>
+                <span>Goals</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="progress">
+                <span>📊</span>
+                <span>Progress</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="focus">
+                <span>🍅</span>
+                <span>Focus</span>
+            </a>
+
+            <p class="nav-title">ORGANIZATION</p>
+
+            <a href="#" class="nav-item" data-page="categories">
+                <span>📁</span>
+                <span>Categories</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="themeToggle"
+                class="nav-item theme-toggle"
+                type="button"
+            >
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
+
+            <button
+                id="logoutBtn"
+                class="logout-btn"
+                type="button"
+            >
+                <span>🚪</span>
+                <span>Logout</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main-content">
+
+        <header class="top-bar">
+
+            <div>
+                <h1 id="pageTitle">Today</h1>
+                <p id="currentDate"></p>
             </div>
 
+            <div class="top-actions">
 
-            <nav class="navigation">
+                <div class="stat-card">
+                    <span>🔥</span>
 
-                <p class="nav-title">MAIN</p>
-
-                <a href="#" class="nav-item active">
-                    <span>🏠</span>
-                    <span>Today</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>📋</span>
-                    <span>All Tasks</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>⭐</span>
-                    <span>Important</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>📅</span>
-                    <span>Calendar</span>
-                </a>
-
-
-                <p class="nav-title">PRODUCTIVITY</p>
-
-                <a href="#" class="nav-item">
-                    <span>🎯</span>
-                    <span>Goals</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>📊</span>
-                    <span>Progress</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span>🍅</span>
-                    <span>Focus</span>
-                </a>
-
-
-                <p class="nav-title">ORGANIZATION</p>
-
-                <a href="#" class="nav-item">
-                    <span>📁</span>
-                    <span>Categories</span>
-                </a>
-
-            </nav>
-
-
-            <div class="sidebar-bottom">
-
-                <button
-    id="themeToggle"
-    class="nav-item theme-toggle"
-    type="button"
->
-    <span id="themeIcon">🌙</span>
-    <span id="themeText">Dark Mode</span>
-</button>
-
-                <button id="logoutBtn" class="logout-btn">
-                    <span>🚪</span>
-                    <span>Logout</span>
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <!-- ================= MAIN CONTENT ================= -->
-
-        <main class="main-content">
-
-            <!-- TOP BAR -->
-
-            <header class="top-bar">
-
-                <div>
-                    <h1>Today</h1>
-                    <p id="currentDate"></p>
+                    <div>
+                        <small>Streak</small>
+                        <strong id="streakValue">0 days</strong>
+                    </div>
                 </div>
 
+                <div class="stat-card">
+                    <span>⭐</span>
 
-                <div class="top-actions">
-
-                    <div class="stat-card">
-                        <span>🔥</span>
-
-                        <div>
-                            <small>Streak</small>
-                            <strong>7 days</strong>
-                        </div>
+                    <div>
+                        <small>Points</small>
+                        <strong id="pointsValue">0</strong>
                     </div>
+                </div>
 
-
-                    <div class="stat-card">
-                        <span>⭐</span>
-
-                        <div>
-                            <small>Points</small>
-                            <strong>1,250</strong>
-                        </div>
-                    </div>
-
-
-                    <button class="profile-btn">
-                        <img
+                <button
+                    class="profile-btn"
+                    type="button"
+                >
+                    <img
                         id="profileImage"
                         class="profile-avatar"
                         src=""
                         alt="Profile"
-                        >
-                    </button>
-
-                </div>
-
-            </header>
-
-
-            <!-- GREETING -->
-
-            <section class="greeting">
-
-                <h2>
-                    <span id="greetingText">Good morning</span>,
-                    <span id="userName">User</span> 👋
-                </h2>
-
-                <p id="taskCountText">You have 0 tasks planned for today.</p>
-
-            </section>
-
-
-            <!-- SEARCH + ADD TASK -->
-
-            <section class="task-controls">
-
-                <div class="search-box">
-
-                    <span>🔍</span>
-
-                    <input
-                        type="text"
-                        placeholder="Search tasks..."
-                        id="searchInput"
                     >
-
-                </div>
-
-
-                <button id="addTaskBtn" class="add-task-btn">
-
-                    <span>+</span>
-
-                    Add Task
-
                 </button>
 
-            </section>
+            </div>
+
+        </header>
 
 
-            <!-- PROGRESS -->
+        <!-- ================= DASHBOARD HEADER ================= -->
 
-            <section class="progress-section">
+        <section class="greeting">
 
-                <div class="progress-header">
-                    
-                    <span>Today's Progress</span>
-                    
-                    <strong id="progressText">0 / 0 completed</strong>
-                
-                </div>
+            <h2>
+                <span id="greetingText">
+                    Good morning
+                </span>,
+                <span id="userName">
+                    User
+                </span>
+                👋
+            </h2>
+
+            <p id="taskCountText">
+                You have 0 tasks planned for today.
+            </p>
+
+        </section>
 
 
-                <div class="progress-bar">
+        <!-- ================= SEARCH ================= -->
 
-                    <div
-                    class="progress-fill"
+        <section class="task-controls">
+
+            <div class="search-box">
+
+                <span>🔍</span>
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search tasks..."
+                >
+
+            </div>
+
+            <button
+                id="addTaskBtn"
+                class="add-task-btn"
+                type="button"
+            >
+                +
+                Add Task
+            </button>
+
+        </section>
+
+
+        <!-- ================= PROGRESS ================= -->
+
+        <section
+            class="progress-section"
+            id="dashboardProgress"
+        >
+
+            <div class="progress-header">
+
+                <span>Today's Progress</span>
+
+                <strong id="progressText">
+                    0 / 0 completed
+                </strong>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
                     id="progressFill"
-                    ></div>
+                    class="progress-fill"
+                ></div>
 
-                </div>
+            </div>
 
-            </section>
+        </section>
 
 
-            <!-- TASKS -->
+        <!-- ==================================================
+             DYNAMIC CONTENT
+        ================================================== -->
 
-            <section class="tasks-section">
+        <section id="pageContent">
+
+            <!-- TODAY / TASK VIEW -->
+
+            <div id="taskView">
 
                 <div class="section-header">
 
-                    <h2>Today's Tasks</h2>
+                    <h2 id="taskSectionTitle">
+                        Today's Tasks
+                    </h2>
 
-                    <button class="filter-btn">
-                        Filter ▾
+                    <button
+                        id="filterBtn"
+                        class="filter-btn"
+                        type="button"
+                    >
+                        Filter: All
                     </button>
 
                 </div>
 
+                <div
+                    id="taskList"
+                    class="task-list"
+                ></div>
 
-                <div id="taskList" class="task-list">
+            </div>
+
+
+            <!-- CALENDAR -->
+
+            <div
+                id="calendarView"
+                class="page-view"
+                hidden
+            >
+
+                <div class="view-header">
+
+                    <div>
+                        <h2>Calendar</h2>
+                        <p>View your tasks by date.</p>
+                    </div>
+
+                    <div class="calendar-controls">
+
+                        <button
+                            id="prevMonthBtn"
+                            type="button"
+                        >
+                            ‹
+                        </button>
+
+                        <strong id="calendarMonth">
+                            Month
+                        </strong>
+
+                        <button
+                            id="nextMonthBtn"
+                            type="button"
+                        >
+                            ›
+                        </button>
+
+                    </div>
 
                 </div>
 
-            </section>
+                <div
+                    id="calendarGrid"
+                    class="calendar-grid"
+                ></div>
 
-        </main>
+                <div
+                    id="calendarTasks"
+                    class="calendar-tasks"
+                ></div>
 
-    </div>
+            </div>
 
-    <!-- ============================= -->
-<!-- ADD TASK MODAL -->
-<!-- ============================= -->
 
-<div id="taskModal" class="modal-overlay">
+            <!-- GOALS -->
+
+            <div
+                id="goalsView"
+                class="page-view"
+                hidden
+            >
+
+                <div class="view-header">
+
+                    <div>
+                        <h2>Goals</h2>
+                        <p>Set goals and track your progress.</p>
+                    </div>
+
+                    <button
+                        id="addGoalBtn"
+                        class="primary-btn"
+                        type="button"
+                    >
+                        + Add Goal
+                    </button>
+
+                </div>
+
+                <div
+                    id="goalList"
+                    class="goal-list"
+                ></div>
+
+            </div>
+
+
+            <!-- PROGRESS VIEW -->
+
+            <div
+                id="progressView"
+                class="page-view"
+                hidden
+            >
+
+                <div class="view-header">
+
+                    <div>
+                        <h2>Progress</h2>
+                        <p>Your productivity overview.</p>
+                    </div>
+
+                </div>
+
+                <div
+                    id="statisticsContainer"
+                    class="statistics-grid"
+                ></div>
+
+                <div
+                    id="categoryProgress"
+                    class="category-progress"
+                ></div>
+
+            </div>
+
+
+            <!-- FOCUS -->
+
+            <div
+                id="focusView"
+                class="page-view"
+                hidden
+            >
+
+                <div class="focus-container">
+
+                    <h2>Focus Mode</h2>
+
+                    <p>
+                        Work for 25 minutes, then take a break.
+                    </p>
+
+                    <div
+                        id="timerDisplay"
+                        class="timer-display"
+                    >
+                        25:00
+                    </div>
+
+                    <div class="focus-mode-label">
+                        <span id="focusMode">
+                            Focus Time
+                        </span>
+                    </div>
+
+                    <div class="focus-buttons">
+
+                        <button
+                            id="startTimerBtn"
+                            class="primary-btn"
+                            type="button"
+                        >
+                            ▶ Start
+                        </button>
+
+                        <button
+                            id="pauseTimerBtn"
+                            class="secondary-btn"
+                            type="button"
+                        >
+                            ⏸ Pause
+                        </button>
+
+                        <button
+                            id="resetTimerBtn"
+                            class="secondary-btn"
+                            type="button"
+                        >
+                            ↻ Reset
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CATEGORIES -->
+
+            <div
+                id="categoriesView"
+                class="page-view"
+                hidden
+            >
+
+                <div class="view-header">
+
+                    <div>
+                        <h2>Categories</h2>
+                        <p>Organize your tasks.</p>
+                    </div>
+
+                </div>
+
+                <div class="category-create">
+
+                    <input
+                        id="newCategoryInput"
+                        type="text"
+                        placeholder="New category name..."
+                    >
+
+                    <button
+                        id="addCategoryBtn"
+                        class="primary-btn"
+                        type="button"
+                    >
+                        + Add Category
+                    </button>
+
+                </div>
+
+                <div
+                    id="categoryList"
+                    class="category-list"
+                ></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     TASK MODAL
+========================================================= -->
+
+<div
+    id="taskModal"
+    class="modal-overlay"
+    hidden
+>
 
     <div class="task-modal">
 
         <div class="modal-header">
 
             <div>
-                <h2 id="taskModalTitle">Create New Task</h2>
-                <p>Add something you want to accomplish.</p>
+
+                <h2 id="taskModalTitle">
+                    Create New Task
+                </h2>
+
+                <p>
+                    Add something you want to accomplish.
+                </p>
+
             </div>
 
-            <button id="closeModalBtn" class="close-modal-btn">
+            <button
+                id="closeModalBtn"
+                class="close-modal-btn"
+                type="button"
+            >
                 ×
             </button>
 
@@ -266,17 +523,15 @@
 
         <form id="taskForm">
 
-            <!-- Task Title -->
-
             <div class="form-group">
 
-                <label for="taskTitle">
+                <label>
                     Task title
                 </label>
 
                 <input
-                    type="text"
                     id="taskTitle"
+                    type="text"
                     placeholder="What do you need to do?"
                     required
                 >
@@ -284,11 +539,9 @@
             </div>
 
 
-            <!-- Description -->
-
             <div class="form-group">
 
-                <label for="taskDescription">
+                <label>
                     Description
                 </label>
 
@@ -301,42 +554,22 @@
             </div>
 
 
-            <!-- Category + Priority -->
-
             <div class="form-row">
 
                 <div class="form-group">
 
-                    <label for="taskCategory">
+                    <label>
                         Category
                     </label>
 
-                    <select id="taskCategory">
-
-                        <option value="personal">
-                            👤 Personal
-                        </option>
-
-                        <option value="work">
-                            💼 Work
-                        </option>
-
-                        <option value="study">
-                            📚 Study
-                        </option>
-
-                        <option value="fitness">
-                            🏋️ Fitness
-                        </option>
-
-                    </select>
+                    <select id="taskCategory"></select>
 
                 </div>
 
 
                 <div class="form-group">
 
-                    <label for="taskPriority">
+                    <label>
                         Priority
                     </label>
 
@@ -346,7 +579,10 @@
                             🟢 Low
                         </option>
 
-                        <option value="medium" selected>
+                        <option
+                            value="medium"
+                            selected
+                        >
                             🟡 Medium
                         </option>
 
@@ -358,145 +594,155 @@
 
                 </div>
 
+            </div>
+
+
+            <div class="form-row">
+
                 <div class="form-group">
-                    
-                    <label for="taskDueDate">
+
+                    <label>
                         Due Date
                     </label>
-                    
+
                     <input
-                    type="date"
-                    id="taskDueDate"
+                        id="taskDueDate"
+                        type="date"
                     >
-                
+
                 </div>
 
                 <div class="form-group">
-                    
-                    <label for="taskDueTime">
+
+                    <label>
                         Due Time
                     </label>
-                    
+
                     <input
-                    type="time"
-                    id="taskDueTime"
+                        id="taskDueTime"
+                        type="time"
                     >
 
                 </div>
-
-                <div class="form-group">
-
-    <label for="taskReminder">
-        Reminder
-    </label>
-
-    <select id="taskReminder">
-
-        <option value="none">
-            No reminder
-        </option>
-
-        <option value="5">
-            5 minutes before
-        </option>
-
-        <option value="15">
-            15 minutes before
-        </option>
-
-        <option value="30">
-            30 minutes before
-        </option>
-
-        <option value="60">
-            1 hour before
-        </option>
-
-        <option value="1440">
-            1 day before
-        </option>
-
-    </select>
-
-</div>
-
-<div class="form-group">
-
-    <label for="taskRepeat">
-        Repeat
-    </label>
-
-    <select id="taskRepeat">
-
-        <option value="none">
-            Does not repeat
-        </option>
-
-        <option value="daily">
-            Every day
-        </option>
-
-        <option value="weekly">
-            Every week
-        </option>
-
-        <option value="monthly">
-            Every month
-        </option>
-
-        <option value="custom">
-            Custom
-        </option>
-
-    </select>
-
-</div>
-
-<div class="form-group">
-
-    <label>
-        Subtasks
-    </label>
-
-    <div id="subtaskInputContainer">
-
-        <div class="subtask-input">
-
-            <input
-                type="text"
-                class="subtask-title"
-                placeholder="Add a subtask..."
-            >
-
-            <button
-                type="button"
-                id="addSubtaskBtn"
-            >
-                + Add Subtask
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
 
             </div>
 
 
-            <!-- Modal Buttons -->
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+                        Reminder
+                    </label>
+
+                    <select id="taskReminder">
+
+                        <option value="none">
+                            No reminder
+                        </option>
+
+                        <option value="5">
+                            5 minutes before
+                        </option>
+
+                        <option value="15">
+                            15 minutes before
+                        </option>
+
+                        <option value="30">
+                            30 minutes before
+                        </option>
+
+                        <option value="60">
+                            1 hour before
+                        </option>
+
+                        <option value="1440">
+                            1 day before
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Repeat
+                    </label>
+
+                    <select id="taskRepeat">
+
+                        <option value="none">
+                            Does not repeat
+                        </option>
+
+                        <option value="daily">
+                            Every day
+                        </option>
+
+                        <option value="weekly">
+                            Every week
+                        </option>
+
+                        <option value="monthly">
+                            Every month
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Subtasks
+                </label>
+
+                <div id="subtaskInputContainer">
+
+                    <div class="subtask-input">
+
+                        <input
+                            class="subtask-title"
+                            type="text"
+                            placeholder="Add a subtask..."
+                        >
+
+                        <button
+                            id="addSubtaskBtn"
+                            type="button"
+                        >
+                            + Add
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
 
             <div class="modal-actions">
 
                 <button
-                    type="button"
                     id="cancelTaskBtn"
                     class="cancel-btn"
+                    type="button"
                 >
                     Cancel
                 </button>
 
-                <button type="submit" id="taskSubmitBtn">
+                <button
+                    id="taskSubmitBtn"
+                    class="create-task-btn"
+                    type="submit"
+                >
                     Create Task
                 </button>
 
@@ -509,8 +755,108 @@
 </div>
 
 
-    <script type="module" src="dashboard.js"></script>
+<!-- =========================================================
+     GOAL MODAL
+========================================================= -->
+
+<div
+    id="goalModal"
+    class="modal-overlay"
+    hidden
+>
+
+    <div class="task-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    Create Goal
+                </h2>
+
+                <p>
+                    What do you want to achieve?
+                </p>
+
+            </div>
+
+            <button
+                id="closeGoalModalBtn"
+                class="close-modal-btn"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="goalForm">
+
+            <div class="form-group">
+
+                <label>
+                    Goal name
+                </label>
+
+                <input
+                    id="goalTitle"
+                    type="text"
+                    placeholder="Example: Complete Python course"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Target
+                </label>
+
+                <input
+                    id="goalTarget"
+                    type="number"
+                    min="1"
+                    value="1"
+                    required
+                >
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelGoalBtn"
+                    class="cancel-btn"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="create-task-btn"
+                    type="submit"
+                >
+                    Create Goal
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script
+    type="module"
+    src="dashboard.js"
+></script>
 
 </body>
-
 </html>
