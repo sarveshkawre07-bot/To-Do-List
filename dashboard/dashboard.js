@@ -1,3 +1,5 @@
+// dashboard.js
+
 import {
     auth,
     signOut,
@@ -17,6 +19,79 @@ import {
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+// ======================================
+// Theme System
+// ======================================
+
+const themeToggle =
+    document.getElementById("themeToggle");
+
+const themeIcon =
+    document.getElementById("themeIcon");
+
+const themeText =
+    document.getElementById("themeText");
+
+
+function applyTheme(theme) {
+
+    document.documentElement.setAttribute(
+        "data-theme",
+        theme
+    );
+
+    if (theme === "dark") {
+
+        themeIcon.textContent = "☀️";
+        themeText.textContent = "Light Mode";
+
+    } else {
+
+        themeIcon.textContent = "🌙";
+        themeText.textContent = "Dark Mode";
+
+    }
+
+}
+
+
+// Load saved theme immediately
+
+const savedTheme =
+    localStorage.getItem("theme") || "light";
+
+applyTheme(savedTheme);
+
+
+// Toggle theme
+
+if (themeToggle) {
+
+    themeToggle.addEventListener(
+        "click",
+        () => {
+
+            const currentTheme =
+                document.documentElement
+                    .getAttribute("data-theme");
+
+            const newTheme =
+                currentTheme === "dark"
+                    ? "light"
+                    : "dark";
+
+            localStorage.setItem(
+                "theme",
+                newTheme
+            );
+
+            applyTheme(newTheme);
+
+        }
+    );
+
+}
 
 
 // ======================================
@@ -159,6 +234,29 @@ const cancelTaskBtn =
 
 addTaskBtn.addEventListener("click", () => {
 
+    // Switch back to Create mode
+    editingTask = null;
+    editingTaskCard = null;
+
+    // Reset form
+    taskForm.reset();
+
+    // Reset subtasks
+    subtasks = [];
+
+    renderSubtasks();
+
+    // Reset modal title
+    document.getElementById(
+        "taskModalTitle"
+    ).textContent = "Create New Task";
+
+    // Reset submit button
+    document.getElementById(
+        "taskSubmitBtn"
+    ).textContent = "Create Task";
+
+    // Open modal
     taskModal.classList.add("show");
 
 });
@@ -188,6 +286,13 @@ const taskForm =
 
 const taskList =
     document.getElementById("taskList");
+
+// ======================================
+// Task Form Mode
+// ======================================
+
+let editingTask = null;
+let editingTaskCard = null;
 
 // ======================================
 // Subtasks
@@ -326,125 +431,344 @@ function renderSubtasks() {
 
 
 taskForm.addEventListener(
-    "submit", 
+    "submit",
     async (event) => {
 
-    event.preventDefault();
+        event.preventDefault();
+
+        // ===============================
+        // Get form values
+        // ===============================
+
+        const title =
+            document.getElementById("taskTitle").value.trim();
+
+        const description =
+            document.getElementById("taskDescription").value.trim();
+
+        const category =
+            document.getElementById("taskCategory").value;
+
+        const priority =
+            document.getElementById("taskPriority").value;
+
+        const dueDate =
+            document.getElementById("taskDueDate").value;
+
+        const dueTime =
+            document.getElementById("taskDueTime").value;
+
+        const reminder =
+            document.getElementById("taskReminder").value;
+
+        const repeat =
+            document.getElementById("taskRepeat").value;
+
+        
+
+        // ===============================
+        // Check user
+        // ===============================
+
+        const user = auth.currentUser;
+
+        if (!user) {
+
+            console.error(
+                "No authenticated user."
+            );
+
+            return;
+
+        }
 
 
-    // Get form values
+        // ===============================
+        // EDIT EXISTING TASK
+        // ===============================
 
-    const title =
-        document.getElementById("taskTitle").value.trim();
+        if (editingTask) {
 
-    const description =
-        document.getElementById("taskDescription").value.trim();
+            try {
 
-    const category =
-        document.getElementById("taskCategory").value;
-
-    const priority =
-        document.getElementById("taskPriority").value;
-
-    const dueDate =
-    document.getElementById("taskDueDate").value;
-
-    const dueTime =
-    document.getElementById("taskDueTime").value;
-
-    const reminder =
-    document.getElementById("taskReminder").value;
-
-    const repeat =
-    document.getElementById("taskRepeat").value;
+                const taskRef = doc(
+                    db,
+                    "users",
+                    user.uid,
+                    "tasks",
+                    editingTask.id
+                );
 
 
-    // Create task object
+                // ======================================
+// Determine task completion from subtasks
+// ======================================
 
-    const task = {
+const updatedSubtasks =
+    [...subtasks];
 
-        title: title,
-
-        description: description,
-
-        category: category,
-
-        priority: priority,
-
-        completed: false,
-
-        starred: false,
-
-        dueDate: dueDate,
-
-        dueTime: dueTime,
-
-        reminder: reminder,
-
-        repeat: repeat,
-
-        subtasks: subtasks,
-
-        createdAt: serverTimestamp()
-
-    };
-
-
-    console.log("New task:", task);
-
-
-    // Display task
-
-    const user = auth.currentUser;
-
-if (!user) {
-
-    console.error("No authenticated user.");
-
-    return;
-
-}
-
-const tasksCollection =
-    collection(
-        db,
-        "users",
-        user.uid,
-        "tasks"
+const allSubtasksCompleted =
+    updatedSubtasks.length > 0 &&
+    updatedSubtasks.every(
+        (subtask) =>
+            subtask.completed === true
     );
 
-const taskRef =
-    await addDoc(
-        tasksCollection,
-        task
-    );
 
-task.id = taskRef.id;
+// A task is complete only when
+// all of its subtasks are complete.
 
-console.log(
-    "Task saved to Firestore:",
-    task
+const updatedCompleted =
+    updatedSubtasks.length > 0
+        ? allSubtasksCompleted
+        : editingTask.completed;
+
+
+const updatedTaskData = {
+
+    title: title,
+
+    description: description,
+
+    category: category,
+
+    priority: priority,
+
+    dueDate: dueDate,
+
+    dueTime: dueTime,
+
+    reminder: reminder,
+
+    repeat: repeat,
+
+    subtasks: updatedSubtasks,
+
+    completed: updatedCompleted
+
+};
+
+
+                await updateDoc(
+                    taskRef,
+                    updatedTaskData
+                );
+
+
+                // Update local task object
+
+                editingTask.title =
+                    title;
+
+                editingTask.description =
+                    description;
+
+                editingTask.category =
+                    category;
+
+                editingTask.priority =
+                    priority;
+
+                editingTask.dueDate =
+                    dueDate;
+
+                editingTask.dueTime =
+                    dueTime;
+
+                editingTask.reminder =
+                    reminder;
+
+                editingTask.repeat =
+                    repeat;
+
+                editingTask.subtasks =
+                    [...subtasks];
+                    
+                editingTask.completed =
+                updatedCompleted;
+
+                console.log(
+                    "Task updated in Firestore:",
+                    editingTask
+                );
+
+
+                // Replace old card with updated card
+
+                if (editingTaskCard) {
+
+                    editingTaskCard.remove();
+
+                }
+
+                addTaskToUI(editingTask);
+
+
+                // Update dashboard
+
+                updateProgress();
+
+                updateTaskCount();
+
+
+                // Close modal
+
+                taskModal.classList.remove("show");
+
+
+                // Reset form state
+
+                taskForm.reset();
+
+                subtasks = [];
+
+                editingTask = null;
+
+                editingTaskCard = null;
+
+                renderSubtasks();
+
+
+                // Reset modal UI
+
+                document.getElementById(
+                    "taskModalTitle"
+                ).textContent =
+                    "Create New Task";
+
+                document.getElementById(
+                    "taskSubmitBtn"
+                ).textContent =
+                    "Create Task";
+
+
+                return;
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to update task:",
+                    error
+                );
+
+                alert(
+                    "Unable to update this task. Please try again."
+                );
+
+                return;
+
+            }
+
+        }
+
+
+        // ===============================
+        // CREATE NEW TASK
+        // ===============================
+
+        const task = {
+
+            title: title,
+
+            description: description,
+
+            category: category,
+
+            priority: priority,
+
+            completed: false,
+
+            starred: false,
+
+            dueDate: dueDate,
+
+            dueTime: dueTime,
+
+            reminder: reminder,
+
+            repeat: repeat,
+
+            subtasks: [...subtasks],
+
+            createdAt: serverTimestamp()
+
+        };
+
+
+        console.log(
+            "New task:",
+            task
+        );
+
+
+        try {
+
+            const tasksCollection =
+                collection(
+                    db,
+                    "users",
+                    user.uid,
+                    "tasks"
+                );
+
+
+            const taskRef =
+                await addDoc(
+                    tasksCollection,
+                    task
+                );
+
+
+            task.id =
+                taskRef.id;
+
+
+            console.log(
+                "Task saved to Firestore:",
+                task
+            );
+
+
+            addTaskToUI(task);
+
+            updateProgress();
+
+            updateTaskCount();
+
+
+            // Close modal
+
+            taskModal.classList.remove("show");
+
+
+            // Reset form
+
+            taskForm.reset();
+
+            subtasks = [];
+
+            editingTask = null;
+
+            editingTaskCard = null;
+
+            renderSubtasks();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to create task:",
+                error
+            );
+
+            alert(
+                "Unable to create this task. Please try again."
+            );
+
+        }
+
+    }
 );
-
-addTaskToUI(task);
-
-    updateProgress();
-
-    updateTaskCount();
-
-
-    // Close modal
-
-    taskModal.classList.remove("show");
-
-
-    // Reset form
-
-    taskForm.reset();
-
-    subtasks = [];
-
-});
 
 
 // ======================================
@@ -461,16 +785,22 @@ function addTaskToUI(task) {
 
     taskCard.innerHTML = `
 
+    <div class="task-main-row">
+
+        <!-- Task checkbox -->
+
         <div class="task-check">
 
             <input
-            type="checkbox"
-            class="task-checkbox"
-            ${task.completed ? "checked" : ""}
+                type="checkbox"
+                class="task-checkbox"
+                ${task.completed ? "checked" : ""}
             >
 
         </div>
 
+
+        <!-- Task information -->
 
         <div class="task-info">
 
@@ -482,61 +812,160 @@ function addTaskToUI(task) {
                 ${task.description || "No description added."}
             </p>
 
-
             <div class="task-meta">
 
-    <span>
-        📁 ${formatCategory(task.category)}
-    </span>
+                <span>
+    ${getCategoryIcon(task.category)}
+    ${formatCategory(task.category)}
+</span>
 
-    <span>
-        ${getPriorityIcon(task.priority)}
-        ${formatPriority(task.priority)}
-    </span>
+                <span>
+                    ${getPriorityIcon(task.priority)}
+                    ${formatPriority(task.priority)}
+                </span>
 
-    ${
-        task.dueDate && task.dueTime
-        ? `
-            <span>
-                📅 ${task.dueDate}
-                ⏰ ${formatTime(task.dueTime)}
-            </span>
-        `
-        : task.dueDate
-        ? `
-            <span>
-                📅 ${task.dueDate}
-            </span>
-        `
-        : task.dueTime
-        ? `
-            <span>
-                ⏰ ${formatTime(task.dueTime)}
-            </span>
-        `
-        : ""
-    }
+                ${
+                    task.dueDate && task.dueTime
+                    ? `
+                        <span>
+                            📅 ${task.dueDate}
+                            ⏰ ${formatTime(task.dueTime)}
+                        </span>
+                    `
+                    : task.dueDate
+                    ? `
+                        <span>
+                            📅 ${task.dueDate}
+                        </span>
+                    `
+                    : task.dueTime
+                    ? `
+                        <span>
+                            ⏰ ${formatTime(task.dueTime)}
+                        </span>
+                    `
+                    : ""
+                }
 
-</div>
+            </div>
 
         </div>
 
+
+        <!-- Task actions -->
 
         <div class="task-actions">
 
-            <button class="star-btn">
-            ${task.starred ? "★" : "☆"}
+            <button
+                class="star-task-btn ${task.starred ? "important" : ""}"
+                type="button"
+                title="${task.starred ? "Unmark important" : "Mark important"}"
+            >
+                ${task.starred ? "★" : "☆"}
             </button>
 
-            <button class="more-btn" title="Delete task">
-            🗑️
+
+            <button
+                class="task-menu-btn"
+                type="button"
+                title="Task options"
+            >
+                ⋮
             </button>
+
+
+            <div class="task-menu">
+
+                <button
+                    class="edit-task-btn"
+                    type="button"
+                >
+                    ✏️ Edit
+                </button>
+
+                <button
+                    class="delete-task-btn"
+                    type="button"
+                >
+                    🗑️ Delete
+                </button>
+
+            </div>
+
         </div>
 
-    `;
+    </div>
+
+
+    <!-- Subtasks -->
+
+    <div
+        class="subtask-section"
+        style="display: none;"
+    >
+
+        <div class="subtask-header">
+
+            <strong>
+                Subtasks
+            </strong>
+
+            <span class="subtask-progress">
+                0 / 0 completed
+            </span>
+
+        </div>
+
+        <div class="subtask-list"></div>
+
+    </div>
+
+`;
 
 
     taskList.appendChild(taskCard);
+
+    const subtaskSection =
+    taskCard.querySelector(
+        ".subtask-section"
+    );
+
+    
+
+renderTaskSubtasks(
+    task,
+    subtaskSection
+);
+
+// ======================================
+// Expand / Collapse Subtasks
+// ======================================
+
+taskCard.addEventListener(
+    "click",
+    (event) => {
+
+        // Don't expand when clicking
+        // buttons or checkboxes
+        if (
+            event.target.closest("button") ||
+            event.target.closest("input")
+        ) {
+            return;
+        }
+
+
+        const isOpen =
+            subtaskSection.style.display !== "none";
+
+
+        subtaskSection.style.display =
+            isOpen
+                ? "none"
+                : "block";
+
+    }
+);
 
 // Restore completed state visually
 if (task.completed) {
@@ -593,9 +1022,147 @@ checkbox.addEventListener("change", async () => {
 
 });
 
-const starButton =
-    taskCard.querySelector(".star-btn");
+// ======================================
+// Task Options Menu
+// ======================================
 
+const menuButton =
+    taskCard.querySelector(".task-menu-btn");
+
+const taskMenu =
+    taskCard.querySelector(".task-menu");
+
+const editButton =
+    taskCard.querySelector(".edit-task-btn");
+
+   editButton.addEventListener("click", () => {
+
+    console.log(
+        "Editing task:",
+        task
+    );
+
+    editingTask = task;
+    editingTaskCard = taskCard;
+
+    document.getElementById(
+    "taskModalTitle"
+).textContent = "Edit Task";
+
+document.getElementById(
+    "taskSubmitBtn"
+).textContent = "Save Changes";
+
+    taskMenu.classList.remove("show");
+
+
+    // ===============================
+    // Populate Edit Form
+    // ===============================
+
+    document.getElementById("taskTitle").value =
+        task.title || "";
+
+    document.getElementById("taskDescription").value =
+        task.description || "";
+
+    document.getElementById("taskCategory").value =
+        task.category || "";
+
+    document.getElementById("taskPriority").value =
+        task.priority || "";
+
+    document.getElementById("taskDueDate").value =
+        task.dueDate || "";
+
+    document.getElementById("taskDueTime").value =
+        task.dueTime || "";
+
+    document.getElementById("taskReminder").value =
+        task.reminder || "";
+
+    document.getElementById("taskRepeat").value =
+        task.repeat || "";
+
+
+    // ===============================
+    // Populate Subtasks
+    // ===============================
+
+    subtasks =
+        task.subtasks
+            ? [...task.subtasks]
+            : [];
+
+    renderSubtasks();
+
+
+    // Open modal
+
+    taskModal.classList.add("show");
+
+});
+
+const starButton =
+    taskCard.querySelector(".star-task-btn");
+
+const deleteButton =
+    taskCard.querySelector(".delete-task-btn");
+
+
+// Open / close menu
+
+menuButton.addEventListener("click", (event) => {
+
+    event.stopPropagation();
+
+    const isOpening =
+        !taskMenu.classList.contains("show");
+
+
+    // Close other open menus
+
+    document
+        .querySelectorAll(".task-menu.show")
+        .forEach((menu) => {
+
+            menu.classList.remove("show");
+
+            const card =
+                menu.closest(".task-card");
+
+            if (card) {
+                card.classList.remove("menu-open");
+            }
+
+        });
+
+
+    if (isOpening) {
+
+        taskMenu.classList.add("show");
+
+        taskCard.classList.add("menu-open");
+
+    }
+
+});
+
+
+// Close menu when clicking elsewhere
+
+document.addEventListener("click", () => {
+
+    taskMenu.classList.remove("show");
+
+    taskCard.classList.remove("menu-open");
+
+});
+
+
+// ======================================
+// Mark Important
+// ======================================
 
 starButton.addEventListener("click", async () => {
 
@@ -635,17 +1202,27 @@ starButton.addEventListener("click", async () => {
             newStarState;
 
         starButton.textContent =
-            task.starred ? "★" : "☆";
+    task.starred ? "★" : "☆";
+
+starButton.classList.toggle(
+    "important",
+    task.starred
+);
+
+starButton.title =
+    task.starred
+        ? "Unmark important"
+        : "Mark important";
 
         console.log(
-            "Task star saved:",
+            "Task importance saved:",
             task.starred
         );
 
     } catch (error) {
 
         console.error(
-            "Failed to update star:",
+            "Failed to update importance:",
             error
         );
 
@@ -653,75 +1230,366 @@ starButton.addEventListener("click", async () => {
 
 });
 
+
+// ======================================
 // Delete Task
+// ======================================
 
-const deleteButton =
-    taskCard.querySelector(".more-btn");
+deleteButton.addEventListener(
+    "click",
+    async () => {
 
-deleteButton.addEventListener("click", async () => {
-
-    const confirmed =
-        confirm(`Delete "${task.title}"?`);
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-
-        const user = auth.currentUser;
-
-        if (!user) {
-
-            console.error(
-                "No authenticated user."
+        const confirmed =
+            confirm(
+                `Delete "${task.title}"?`
             );
 
+        if (!confirmed) {
             return;
+        }
+
+        try {
+
+            const user =
+                auth.currentUser;
+
+            if (!user) {
+
+                console.error(
+                    "No authenticated user."
+                );
+
+                return;
+
+            }
+
+            const taskRef = doc(
+                db,
+                "users",
+                user.uid,
+                "tasks",
+                task.id
+            );
+
+            await deleteDoc(taskRef);
+
+            taskCard.remove();
+
+            updateProgress();
+            updateTaskCount();
+
+            console.log(
+                "Task deleted from Firestore:",
+                task
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to delete task:",
+                error
+            );
+
+            alert(
+                "Unable to delete this task. Please try again."
+            );
 
         }
 
-        const taskRef = doc(
-            db,
-            "users",
-            user.uid,
-            "tasks",
-            task.id
-        );
-
-        await deleteDoc(taskRef);
-
-        taskCard.remove();
-
-        console.log(
-            "Task deleted from Firestore:",
-            task
-        );
-
-        updateProgress();
-        updateTaskCount();
-
-    } catch (error) {
-
-    console.error(
-        "Failed to delete task:",
-        error
-    );
-
-    alert(
-        "Unable to delete this task. Please try again."
-    );
-
     }
+);
 
-});
+
+
+}
+
+function renderTaskSubtasks(
+    task,
+    subtaskSection
+) {
+
+    const subtaskList =
+        subtaskSection.querySelector(
+            ".subtask-list"
+        );
+
+    const subtaskProgress =
+        subtaskSection.querySelector(
+            ".subtask-progress"
+        );
+
+    subtaskList.innerHTML = "";
+
+    const taskSubtasks =
+        task.subtasks || [];
+
+    let completedCount = 0;
+
+
+    taskSubtasks.forEach((subtask) => {
+
+        if (subtask.completed) {
+            completedCount++;
+        }
+
+
+        const subtaskItem =
+            document.createElement("label");
+
+        subtaskItem.className =
+    `task-subtask ${
+        subtask.completed
+            ? "completed"
+            : ""
+    }`;
+
+
+        subtaskItem.innerHTML = `
+
+    <input
+        type="checkbox"
+        class="subtask-checkbox"
+        ${subtask.completed ? "checked" : ""}
+    >
+
+    <span class="subtask-title">
+        ${subtask.title}
+    </span>
+
+`;
+
+
+        const checkbox =
+            subtaskItem.querySelector(
+                ".subtask-checkbox"
+            );
+
+
+        checkbox.addEventListener(
+    "change",
+    async (event) => {
+
+        event.stopPropagation();
+
+        const previousState =
+            subtask.completed;
+
+        subtask.completed =
+            checkbox.checked;
+
+
+        try {
+
+            const user =
+                auth.currentUser;
+
+            if (!user) {
+
+                subtask.completed =
+                    previousState;
+
+                checkbox.checked =
+                    previousState;
+
+                return;
+
+            }
+
+
+            // ======================================
+            // Check whether ALL subtasks are complete
+            // ======================================
+
+            const allSubtasksCompleted =
+                taskSubtasks.length > 0 &&
+                taskSubtasks.every(
+                    (item) => item.completed
+                );
+
+
+            // ======================================
+            // Main task follows subtask completion
+            // ======================================
+
+            const newTaskCompleted =
+                allSubtasksCompleted;
+
+
+            const taskRef = doc(
+                db,
+                "users",
+                user.uid,
+                "tasks",
+                task.id
+            );
+
+
+            // ======================================
+            // Save BOTH to Firebase
+            // ======================================
+
+            await updateDoc(
+                taskRef,
+                {
+
+                    completed:
+                        newTaskCompleted,
+
+                    subtasks:
+                        taskSubtasks
+
+                }
+            );
+
+
+            // ======================================
+            // Update local task
+            // ======================================
+
+            task.completed =
+                newTaskCompleted;
+
+            task.subtasks =
+                taskSubtasks;
+
+
+            // ======================================
+            // Update main task UI
+            // ======================================
+
+            const taskCard =
+                subtaskSection.closest(
+                    ".task-card"
+                );
+
+            const mainTaskCheckbox =
+    taskCard.querySelector(
+        ".task-checkbox"
+    );
+
+if (mainTaskCheckbox) {
+
+    mainTaskCheckbox.checked =
+        newTaskCompleted;
 
 }
 
 
+            if (taskCard) {
+
+                taskCard.classList.toggle(
+                    "completed",
+                    newTaskCompleted
+                );
+
+            }
+
+
+            // ======================================
+            // Update subtask counter
+            // ======================================
+
+            let completedCount = 0;
+
+            taskSubtasks.forEach(
+                (item) => {
+
+                    if (item.completed) {
+                        completedCount++;
+                    }
+
+                }
+            );
+
+
+            subtaskProgress.textContent =
+                `${completedCount} / ${taskSubtasks.length} completed`;
+
+
+            // ======================================
+            // Update subtask visual state
+            // ======================================
+
+            subtaskItem.classList.toggle(
+                "completed",
+                subtask.completed
+            );
+
+
+            // ======================================
+            // Update Today's Progress
+            // ======================================
+
+            updateProgress();
+
+
+            console.log(
+                "Subtask saved to Firebase:",
+                subtask
+            );
+
+            console.log(
+                "Main task completion:",
+                newTaskCompleted
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to save subtask:",
+                error
+            );
+
+
+            // Restore previous state
+
+            subtask.completed =
+                previousState;
+
+            checkbox.checked =
+                previousState;
+
+        }
+
+    }
+);
+
+
+        subtaskList.appendChild(
+            subtaskItem
+        );
+
+    });
+
+
+    subtaskProgress.textContent =
+        `${completedCount} / ${taskSubtasks.length} completed`;
+
+}
+
 // ======================================
 // Category Formatting
 // ======================================
+
+function getCategoryIcon(category) {
+
+    const icons = {
+
+        personal: "👤",
+
+        work: "💼",
+
+        study: "📚",
+
+        fitness: "🏋️"
+
+    };
+
+    return icons[category] || "📁";
+
+}
+
 
 function formatCategory(category) {
 
@@ -1025,7 +1893,8 @@ async function handleTaskCompletion(
 
     const user = auth.currentUser;
 
-    const wasCompleted = task.completed;
+    const wasCompleted =
+        task.completed;
 
     if (!user) {
 
@@ -1047,43 +1916,97 @@ async function handleTaskCompletion(
             task.id
         );
 
+
+        // Sync every subtask with the main task
+
+        const updatedSubtasks =
+            (task.subtasks || []).map(
+                (subtask) => ({
+
+                    ...subtask,
+
+                    completed: completed
+
+                })
+            );
+
+
+        // Save main task + subtasks
+
         await updateDoc(
             taskRef,
             {
-                completed: completed
+
+                completed: completed,
+
+                subtasks: updatedSubtasks
+
             }
         );
+
+
+        // Update local data
 
         task.completed =
             completed;
 
-        // Detect a real completion event
-if (!wasCompleted && completed) {
+        task.subtasks =
+            updatedSubtasks;
 
-    console.log(
-        "Task completed for the first time:",
-        task.id
-    );
 
-}
+        // Update main task appearance
 
         taskCard.classList.toggle(
             "completed",
             completed
         );
 
+
+        // Update visible subtasks
+
+        const subtaskSection =
+            taskCard.querySelector(
+                ".subtask-section"
+            );
+
+        if (subtaskSection) {
+
+            renderTaskSubtasks(
+                task,
+                subtaskSection
+            );
+
+        }
+
+
+        // Progress still counts ONLY main tasks
+
         updateProgress();
+
 
         console.log(
             "Task completion saved:",
             completed
         );
 
+        console.log(
+            "Subtasks synchronized:",
+            updatedSubtasks
+        );
+
+
         return {
-    success: true,
-    completedNow: !wasCompleted && completed,
-    uncompletedNow: wasCompleted && !completed
-};
+
+            success: true,
+
+            completedNow:
+                !wasCompleted && completed,
+
+            uncompletedNow:
+                wasCompleted && !completed
+
+        };
+
 
     } catch (error) {
 

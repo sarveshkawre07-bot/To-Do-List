@@ -1,3 +1,5 @@
+<!--index.html-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -79,10 +81,14 @@
 
             <div class="sidebar-bottom">
 
-                <a href="#" class="nav-item">
-                    <span>⚙️</span>
-                    <span>Settings</span>
-                </a>
+                <button
+    id="themeToggle"
+    class="nav-item theme-toggle"
+    type="button"
+>
+    <span id="themeIcon">🌙</span>
+    <span id="themeText">Dark Mode</span>
+</button>
 
                 <button id="logoutBtn" class="logout-btn">
                     <span>🚪</span>
@@ -247,7 +253,7 @@
         <div class="modal-header">
 
             <div>
-                <h2>Create New Task</h2>
+                <h2 id="taskModalTitle">Create New Task</h2>
                 <p>Add something you want to accomplish.</p>
             </div>
 
@@ -490,10 +496,7 @@
                     Cancel
                 </button>
 
-                <button
-                    type="submit"
-                    class="create-task-btn"
-                >
+                <button type="submit" id="taskSubmitBtn">
                     Create Task
                 </button>
 

@@ -1,14 +1,78 @@
+/* dashboard.css */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ======================================
+   THEME VARIABLES
+====================================== */
+
+:root {
+    --bg-main: #f6f8fc;
+    --bg-surface: #ffffff;
+    --bg-soft: #f8fafc;
+    --bg-hover: #f3f6ff;
+
+    --text-main: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+
+    --border: #e5e7eb;
+
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-soft: #eaf1ff;
+
+    --danger: #dc2626;
+
+    --modal-overlay: rgba(15, 23, 42, 0.45);
+
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+
+/* ======================================
+   DARK THEME
+====================================== */
+
+[data-theme="dark"] {
+
+    --bg-main: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-soft: #172033;
+    --bg-hover: #263449;
+
+    --text-main: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+
+    --border: #334155;
+
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --accent-soft: #1e3a6f;
+
+    --danger: #f87171;
+
+    --modal-overlay: rgba(0, 0, 0, 0.65);
+
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
 
 body {
     font-family: Arial, sans-serif;
-    background: #f6f8fc;
-    color: #1f2937;
+    background: var(--bg-main);
+    color: var(--text-main);
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
 
@@ -34,9 +98,8 @@ button {
     width: 250px;
     min-height: 100vh;
 
-    background: #ffffff;
-
-    border-right: 1px solid #e5e7eb;
+   background: var(--bg-surface);
+border-right: 1px solid var(--border);
 
     display: flex;
     flex-direction: column;
@@ -97,7 +160,7 @@ button {
 
     text-decoration: none;
 
-    color: #6b7280;
+    color: var(--text-secondary);
 
     font-size: 14px;
 
@@ -105,17 +168,12 @@ button {
 }
 
 
-.nav-item:hover {
-    background: #f3f6ff;
-    color: #2563eb;
-}
-
-
 .nav-item.active {
-    background: #eaf1ff;
-    color: #2563eb;
+    background: var(--accent-soft);
+    color: var(--accent);
     font-weight: 600;
 }
+
 
 
 .sidebar-bottom {
@@ -201,9 +259,9 @@ button {
 
 
 .stat-card {
-    background: white;
+    background: var(--bg-surface);
 
-    border: 1px solid #e5e7eb;
+    border-color: var(--border);
 
     border-radius: 12px;
 
@@ -288,9 +346,9 @@ button {
 .search-box {
     flex: 1;
 
-    background: white;
+    background: var(--bg-surface);
 
-    border: 1px solid #e5e7eb;
+    border-color: var(--border);
 
     border-radius: 12px;
 
@@ -342,9 +400,9 @@ button {
 /* ================= PROGRESS ================= */
 
 .progress-section {
-    background: white;
+    background: var(--bg-surface);
 
-    border: 1px solid #e5e7eb;
+    border-color: var(--border);
 
     padding: 18px;
 
@@ -411,9 +469,9 @@ button {
 
 
 .filter-btn {
-    border: 1px solid #e5e7eb;
+    border-color: var(--border);
 
-    background: white;
+    background: var(--bg-surface);
 
     border-radius: 8px;
 
@@ -433,9 +491,9 @@ button {
 
 
 .task-card {
-    background: white;
+    background: var(--bg-surface);
 
-    border: 1px solid #e5e7eb;
+    border-color: var(--border);
 
     border-radius: 14px;
 
@@ -638,7 +696,7 @@ button {
 
     max-width: 520px;
 
-    background: #ffffff;
+    background: var(--bg-surface);
 
     border-radius: 18px;
 
@@ -742,8 +800,6 @@ button {
 .form-group select {
     width: 100%;
 
-    border: 1px solid #e5e7eb;
-
     border-radius: 10px;
 
     padding: 12px 13px;
@@ -754,10 +810,9 @@ button {
 
     outline: none;
 
-    background: #ffffff;
-
-    color: #1f2937;
-
+    background: var(--bg-surface);
+color: var(--text-main);
+border-color: var(--border);
     transition: 0.2s;
 }
 
@@ -1026,4 +1081,632 @@ button {
 
     color: #ef4444;
 
+}
+
+/* ======================================
+   Task Options Menu
+   ====================================== */
+
+.task-actions {
+    position: relative;
+}
+
+.task-menu-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.task-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top:calc(100% + 6px);
+    min-width: 180px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+}
+
+.task-menu.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-menu button {
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.task-menu button:hover {
+    background: #f3f3f3;
+}
+
+.star-task-btn {
+    border: none;
+    background: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #888;
+    padding: 4px 6px;
+}
+
+.star-task-btn.important {
+    color: #f5b942;
+}
+
+.star-task-btn:hover {
+    transform: scale(1.08);
+}
+
+#taskSubmitBtn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+#taskSubmitBtn:hover {
+    background: #1d4ed8;
+}
+
+#taskSubmitBtn:active {
+    transform: scale(0.98);
+}
+
+/* ======================================
+   Task Card Layout
+   ====================================== */
+
+.task-card {
+    display: block;
+    position: relative;
+}
+
+
+/* Main task row */
+
+.task-main-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+
+/* Task information */
+
+.task-info {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* Actions stay at the top-right */
+
+.task-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ======================================
+   Subtask Section
+   ====================================== */
+
+.subtask-section {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 16px;
+    padding: 14px 16px;
+
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+
+/* Subtask heading */
+
+.subtask-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+
+/* Progress text */
+
+.subtask-progress {
+    font-size: 13px;
+    color: #64748b;
+}
+
+
+/* Subtask list */
+
+.subtask-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* Individual subtask */
+
+.task-subtask {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 9px 10px;
+
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    font-size: 14px;
+    color: #334155;
+
+    cursor: pointer;
+}
+
+
+/* Checkbox */
+
+.task-subtask input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+
+/* Hover */
+
+.task-subtask:hover {
+    background: #f1f5f9;
+}
+
+.task-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.task-main-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.task-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 16px;
+}
+
+/* ======================================
+   FINAL TASK CARD LAYOUT
+====================================== */
+
+.task-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* Main task row */
+
+.task-main-row {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 15px;
+}
+
+
+/* Checkbox */
+
+.task-check {
+    flex-shrink: 0;
+}
+
+
+/* Task information */
+
+.task-info {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* Actions */
+
+.task-actions {
+    position: relative;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    margin-left: auto;
+}
+
+
+/* ======================================
+   SUBTASK AREA
+====================================== */
+
+.subtask-section {
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-top: 16px;
+    padding: 14px 16px;
+
+    border-top: 1px solid #e5e7eb;
+
+    background: #f8fafc;
+
+    border-radius: 10px;
+}
+
+
+.subtask-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+
+    font-size: 14px;
+}
+
+
+.subtask-progress {
+    color: #64748b;
+    font-size: 13px;
+}
+
+
+.subtask-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.task-subtask {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 10px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    color: #334155;
+}
+
+
+.task-subtask input {
+    width: 16px;
+    height: 16px;
+
+    cursor: pointer;
+}
+
+/* Keep an open task menu above neighboring cards */
+
+.task-card.menu-open {
+    z-index: 1000;
+}
+
+.task-menu {
+    z-index: 2000;
+}
+
+/* ======================================
+   Completed Subtask
+====================================== */
+
+.task-subtask {
+    transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.task-subtask.completed {
+    background: #f1f5f9;
+    opacity: 0.7;
+}
+
+.task-subtask.completed .subtask-title {
+    text-decoration: line-through;
+    color: #64748b;
+}
+
+/* ======================================
+   THEME TOGGLE — NAVBAR STYLE
+====================================== */
+
+.theme-toggle {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.theme-toggle:hover {
+    background: #f3f6ff;
+    color: #2563eb;
+}
+
+.theme-toggle:focus {
+    outline: none;
+}
+
+.theme-toggle:active {
+    transform: none;
+}
+
+.theme-toggle {
+    color: var(--text-secondary);
+}
+
+/* ======================================
+   DARK THEME — COMPONENT FIXES
+====================================== */
+
+[data-theme="dark"] {
+
+    /* Search */
+    .search-box {
+        background: var(--bg-surface);
+        border-color: var(--border);
+    }
+
+    .search-box input {
+        background: transparent;
+        color: var(--text-main);
+    }
+
+    .search-box input::placeholder {
+        color: var(--text-muted);
+    }
+
+
+    /* Modal */
+    .task-modal {
+        background: var(--bg-surface);
+        color: var(--text-main);
+        box-shadow: var(--shadow);
+    }
+
+    .modal-header p {
+        color: var(--text-secondary);
+    }
+
+
+    /* Form labels */
+    .form-group label {
+        color: var(--text-main);
+    }
+
+
+    /* Form fields */
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        background: var(--bg-soft);
+        color: var(--text-main);
+        border: 1px solid var(--border);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+
+    /* Native date/time controls */
+    .form-group input[type="date"],
+    .form-group input[type="time"] {
+        color-scheme: dark;
+    }
+
+
+    /* Cancel button */
+    .cancel-btn {
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        border-color: var(--border);
+    }
+
+    .cancel-btn:hover {
+        background: var(--bg-hover);
+    }
+
+
+    /* Close button */
+    .close-modal-btn {
+        color: var(--text-secondary);
+    }
+
+    .close-modal-btn:hover {
+        color: var(--text-main);
+    }
+
+
+    /* Progress */
+    .progress-bar {
+        background: var(--border);
+    }
+
+
+    /* Filter */
+    .filter-btn {
+        color: var(--text-secondary);
+        border-color: var(--border);
+    }
+
+
+    /* Task metadata */
+    .task-meta span {
+        background: var(--bg-soft);
+        color: var(--text-secondary);
+    }
+
+
+    /* Subtask section */
+    .subtask-section {
+        background: var(--bg-soft);
+        border-top-color: var(--border);
+    }
+
+
+    /* Subtask cards */
+    .task-subtask {
+        background: var(--bg-surface);
+        border-color: var(--border);
+        color: var(--text-main);
+    }
+
+    .task-subtask:hover {
+        background: var(--bg-hover);
+    }
+
+
+    /* Subtask progress */
+    .subtask-progress {
+        color: var(--text-secondary);
+    }
+
+
+    /* Task menus */
+    .task-menu {
+        background: var(--bg-surface);
+        border-color: var(--border);
+        box-shadow: var(--shadow);
+    }
+
+    .task-menu button {
+        color: var(--text-main);
+    }
+
+    .task-menu button:hover {
+        background: var(--bg-hover);
+    }
+
+
+    /* Completed subtasks */
+    .task-subtask.completed {
+        background: var(--bg-soft);
+    }
+
+    .task-subtask.completed .subtask-title {
+        color: var(--text-muted);
+    }
+
+
+    /* Completed task */
+    .completed .task-info h3,
+    .completed .task-info p {
+        color: var(--text-muted);
+    }
+
+
+    /* Main text */
+    .greeting p,
+    .top-bar p {
+        color: var(--text-secondary);
+    }
+
+
+    /* Navigation */
+    .nav-title {
+        color: var(--text-muted);
+    }
+
+    .nav-item {
+        color: var(--text-secondary);
+    }
+
+    .nav-item:hover {
+        background: var(--bg-hover);
+        color: var(--accent);
+    }
+
+    .nav-item.active {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+
+    /* Logout */
+    .logout-btn {
+        color: var(--text-secondary);
+    }
+}
+
+/* ======================================
+   LIGHT THEME — MODAL BORDER FIX
+====================================== */
+
+:root .form-group input[type="date"],
+:root .form-group input[type="time"],
+:root .subtask-input {
+    border: 1px solid #e5e7eb;
+}
+
+:root .form-group input[type="date"]:focus,
+:root .form-group input[type="time"]:focus,
+:root .subtask-input:focus {
+    border-color: #2563eb;
+    outline: none;
 }
