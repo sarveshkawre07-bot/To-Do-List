@@ -1,6 +1,6 @@
 ﻿/**
  * scoring.js
- * Task Recommendation Scoring Engine - USP MVP Step 7 (V2)
+ * Task Recommendation Scoring Engine - USP MVP Step 8 (V2 + context-aware effort)
  *
  * Public API:
  *   calculateTaskScore(task)              -> { score, breakdown }
@@ -77,9 +77,13 @@ function getImportantScore(task) {
 // ============================================================
 // 4. ESTIMATED EFFORT SCORE  (0-5)
 //
-// Effort is a secondary tiebreaker only.
-// Short tasks get a small nudge; long tasks lose a small amount.
-// This must never override priority or due-date urgency.
+// Effort contributes to the raw score as a small nudge (0-5).
+// It cannot flip a priority tier or urgency step on its own.
+//
+// Additionally, getRecommendedTask() uses a "close-score band":
+// when two tasks are within EFFORT_BAND points of each other,
+// the shorter task wins — making the recommendation feel practical.
+// See EFFORT_BAND constant and the sort comparator below.
 // ============================================================
 
 function getEffortScore(task) {
@@ -110,14 +114,38 @@ export function calculateTaskScore(task) {
 }
 
 // ============================================================
+// 5b. EFFORT RANK  (lower = shorter = more practical)
+// Used by the close-band sort in getRecommendedTask.
+// ============================================================
+
+// When two tasks score within EFFORT_BAND points of each other,
+// the shorter task is recommended.
+//
+// 5 is chosen because:
+//   - The full effort score range is only 1-5 (spread = 4 pts).
+//   - The smallest priority gap is 12 pts (medium 28 -> high 40).
+//   - So effort can only activate the band when priority AND urgency
+//     are already equal — i.e. genuine near-ties.
+const EFFORT_BAND = 5;
+
+function getEffortRank(task) {
+    // Lower rank = shorter = preferred in a close contest
+    const map = { "15": 1, "30": 2, "60": 3, "120": 4, "180+": 5 };
+    return map[task.estimatedEffort ?? "30"] ?? 2;
+}
+
+// ============================================================
 // 6. RECOMMENDED TASK
 // ============================================================
 
 /**
  * getRecommendedTask(tasks)
- * Filters completed tasks, scores the rest, returns highest scorer.
- * Tie-breaking: earlier due date wins; no due date loses to one with a date;
- * both without due date: preserve original order (stable sort).
+ * Filters completed tasks, scores the rest, returns the best recommendation.
+ * Sort order:
+ *   1. If score difference > EFFORT_BAND (8 pts): higher score wins.
+ *   2. Within the band: shorter estimated effort wins (context-aware).
+ *   3. Same effort: earlier due date wins.
+ *   4. No due date loses to a task that has one.
  * Returns null when no incomplete tasks exist.
  */
 export function getRecommendedTask(tasks) {
@@ -127,7 +155,16 @@ export function getRecommendedTask(tasks) {
     const scored = incomplete.map(task => ({ task, ...calculateTaskScore(task) }));
 
     scored.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
+        const scoreDiff = b.score - a.score;
+
+        // Outside the close-score band: higher score wins outright.
+        if (Math.abs(scoreDiff) > EFFORT_BAND) return scoreDiff;
+
+        // Within the close-score band: prefer the shorter task.
+        const effortDiff = getEffortRank(a.task) - getEffortRank(b.task);
+        if (effortDiff !== 0) return effortDiff;
+
+        // Same effort rank: fall back to earlier due date.
         const dueA = getDueDateTime(a.task);
         const dueB = getDueDateTime(b.task);
         if (dueA && dueB) return dueA - dueB;
