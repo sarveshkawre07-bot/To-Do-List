@@ -1,0 +1,653 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Add the focus overlay HTML to index.html": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295541509
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295557790
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921428
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296933799
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297067910
+      }
+    ],
+    "2.1 Add overlay layout and entry animation": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295541734
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295558434
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921483
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296938657
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297074549
+      }
+    ],
+    "2.2 Add badge, title, due date, and chip styles": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295541797
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295559228
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921523
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296943465
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297083336
+      }
+    ],
+    "2.3 Add SVG ring timer styles": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295541867
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295559979
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921601
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296948065
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297088950
+      }
+    ],
+    "2.4 Add done banner, subtask list, and control button styles": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542004
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295560692
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921647
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296954148
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297094688
+      }
+    ],
+    "2.5 Add mobile responsive overrides": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542122
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295561410
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921687
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296958947
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297100418
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297410695
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297422971
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297476014
+      }
+    ],
+    "3.1 Declare `focusState` object and `effortToSeconds()` helper": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542169
+      },
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295562212
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921742
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296964768
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297410794
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297428344
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297481545
+      }
+    ],
+    "4.1 Implement `updateTimerDisplay()` and `updateRingProgress()`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542214
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921782
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297410834
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297492399
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297529866
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297601895
+      }
+    ],
+    "4.3 Implement `startTimer()`, `pauseTimer()`, and `resumeTimer()`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542259
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921877
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297410881
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623366
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297657568
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297733258
+      }
+    ],
+    "5. Checkpoint — Ensure all tests pass, ask the user if questions arise.": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542340
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921935
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297410916
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623467
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297748603
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298013371
+      }
+    ],
+    "6.1 Implement `populateFocusOverlay(task)`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542382
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296921983
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411002
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623520
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298018785
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298691297
+      }
+    ],
+    "6.4 Implement `openFocusMode(task)` and `closeFocusMode()`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542419
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922033
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411046
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623600
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298700934
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298772456
+      }
+    ],
+    "7.1 Implement `handleFocusComplete()`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542459
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922074
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411092
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623673
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298778642
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299241417
+      }
+    ],
+    "7.2 Implement `handleFocusSubtaskToggle(subtask, checked, countEl, labelEl)`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542498
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922117
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411134
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623723
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298784885
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299252188
+      }
+    ],
+    "8.1 Wire overlay button event listeners": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542540
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922160
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411166
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623783
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298790533
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299257913
+      }
+    ],
+    "8.2 Add \"Focus\" button to task card menu in `addTaskToUI()`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542617
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922246
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411208
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623851
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298796430
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299263592
+      }
+    ],
+    "8.4 Replace \"Start Task\" handler in `updateRecommendationUI()` with `openFocusMode`": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542654
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922284
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411244
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623902
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298802535
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299269118
+      }
+    ],
+    "9. Final checkpoint — Ensure all tests pass, ask the user if questions arise.": [
+      {
+        "executionId": "a2c63ea1-8f22-49dd-9b43-3fda2bbafd32",
+        "chatSessionId": "sess_3ecafb5c-2fe4-4052-b373-8b75fe93febb",
+        "timestamp": 1786295542702
+      },
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786296922336
+      },
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297411290
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297623942
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299275855
+      },
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299552388
+      }
+    ],
+    "2. Add focus mode CSS to dashboard.css": [
+      {
+        "executionId": "1e0a0758-c1bf-4a03-a44c-b3a80133828d",
+        "chatSessionId": "sess_2164bf97-c33c-4333-8ccf-ce557026a90b",
+        "timestamp": 1786297100469
+      }
+    ],
+    "3. Implement focusState and core helper functions in dashboard.js": [
+      {
+        "executionId": "ba25a71b-73bf-4ad9-a000-f57389e8619a",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297481606
+      }
+    ],
+    "4. Implement timer engine functions": [
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786297733320
+      }
+    ],
+    "6. Implement overlay population and open/close logic": [
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786298772584
+      }
+    ],
+    "7. Implement task completion and subtask toggle": [
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299252295
+      }
+    ],
+    "8. Wire event listeners and entry points": [
+      {
+        "executionId": "5e52215d-ddbd-4cb3-966c-ab96ea4500d1",
+        "chatSessionId": "sess_7815649e-0ba3-4303-b6c5-af5714d3e6e9",
+        "timestamp": 1786299269237
+      }
+    ],
+    "3.2 Write property test for `effortToSeconds` (Property 7)": [
+      {
+        "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
+        "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
+        "timestamp": 1786299991729
+      },
+      {
+        "executionId": "b93af2a6-6414-4421-9171-143f80ebfe67",
+        "chatSessionId": "sess_ef06bf5f-676d-49d1-ad93-6206c22a485c",
+        "timestamp": 1786300319552
+      }
+    ],
+    "4.2 Write property test for MM:SS formatting (Property 4)": [
+      {
+        "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
+        "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
+        "timestamp": 1786299996636
+      }
+    ],
+    "4.4 Write property test for pause→resume round-trip (Property 5)": [
+      {
+        "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
+        "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
+        "timestamp": 1786300001697
+      }
+    ],
+    "4.5 Write property test for timer floor (Property 6)": [
+      {
+        "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
+        "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
+        "timestamp": 1786300006609
+      }
+    ],
+    "6.2 Write property test for overlay population (Property 1)": [
+      {
+        "executionId": "111df5b1-de54-4c2e-9039-4d24e4118652",
+        "chatSessionId": "sess_83853444-a3ad-427b-a1d1-9d9e7637421a",
+        "timestamp": 1786300011688
+      }
+    ]
+  }
+}

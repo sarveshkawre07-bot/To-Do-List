@@ -310,6 +310,325 @@ let editingTask = null;
 let editingTaskCard = null;
 
 // ======================================
+// Focus Mode State
+// ======================================
+
+const focusState = {
+    task:         null,
+    totalSeconds: 0,
+    remaining:    0,
+    running:      false,
+    intervalId:   null,
+    startEpoch:   null,
+    pausedAt:     null
+};
+
+function effortToSeconds(effort) {
+    const map = {
+        "15":   900,
+        "30":   1800,
+        "60":   3600,
+        "120":  7200,
+        "180+": 5400
+    };
+    return map[effort] ?? 1500;
+}
+
+// ======================================
+// Timer Display Helpers
+// ======================================
+
+const RING_RADIUS       = 54;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 339.292
+
+function updateTimerDisplay() {
+    const s  = focusState.remaining;
+    const mm = String(Math.floor(s / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    const el = document.getElementById("focus-timer-display");
+    if (el) el.textContent = `${mm}:${ss}`;
+}
+
+function updateRingProgress() {
+    const total  = focusState.totalSeconds;
+    const ratio  = total > 0
+        ? Math.min(1, Math.max(0, focusState.remaining / total))
+        : 0;
+    const offset = RING_CIRCUMFERENCE * (1 - ratio);
+    const el = document.getElementById("focus-ring-progress");
+    if (el) el.style.strokeDashoffset = offset;
+}
+
+// ======================================
+// Timer Engine
+// ======================================
+
+function startTimer() {
+    if (focusState.running) return;
+    focusState.running    = true;
+    focusState.startEpoch = Date.now();
+    const base = focusState.pausedAt ?? focusState.totalSeconds;
+    focusState.intervalId = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - focusState.startEpoch) / 1000);
+        focusState.remaining = Math.max(0, base - elapsed);
+        updateTimerDisplay();
+        updateRingProgress();
+        if (focusState.remaining === 0) {
+            clearInterval(focusState.intervalId);
+            focusState.intervalId = null;
+            focusState.running    = false;
+            const banner = document.getElementById("focus-done-banner");
+            if (banner) banner.style.display = "block";
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    if (!focusState.running) return;
+    clearInterval(focusState.intervalId);
+    focusState.intervalId = null;
+    focusState.running    = false;
+    focusState.pausedAt   = focusState.remaining;
+    const btn = document.getElementById("focus-pause-btn");
+    if (btn) btn.textContent = "Resume";
+}
+
+function resumeTimer() {
+    if (focusState.running) return;
+    // pausedAt is already set by pauseTimer(); startTimer() uses it as the base.
+    startTimer();
+    const btn = document.getElementById("focus-pause-btn");
+    if (btn) btn.textContent = "Pause";
+}
+
+// ======================================
+// Focus Overlay Population
+// ======================================
+
+function populateFocusOverlay(task) {
+    // Title
+    document.getElementById("focus-task-title").textContent = task.title;
+
+    // Category / priority / effort badges
+    document.getElementById("focus-category-badge").textContent =
+        `${getCategoryIcon(task.category)} ${formatCategory(task.category)}`;
+    document.getElementById("focus-priority-badge").textContent =
+        `${getPriorityIcon(task.priority)} ${formatPriority(task.priority)}`;
+    document.getElementById("focus-effort-badge").textContent =
+        task.estimatedEffort ? `⏱ ${formatEffort(task.estimatedEffort)}` : "";
+
+    // Due date/time — show only when present
+    const dueEl = document.getElementById("focus-task-due");
+    if (task.dueDate || task.dueTime) {
+        if (task.dueDate && task.dueTime) {
+            dueEl.textContent = `📅 Due: ${formatDueDateTime(task.dueDate, task.dueTime)}`;
+        } else if (task.dueDate) {
+            dueEl.textContent = `📅 Due: ${formatDueDate(task.dueDate)}`;
+        } else {
+            dueEl.textContent = `⏰ Due: ${formatTime(task.dueTime)}`;
+        }
+        dueEl.style.display = "block";
+    } else {
+        dueEl.style.display = "none";
+    }
+
+    // Active duration chip — match data-minutes to focusState.totalSeconds / 60
+    const activeMinutes = focusState.totalSeconds / 60;
+    document.querySelectorAll(".focus-chip").forEach(chip => {
+        chip.classList.toggle(
+            "focus-chip--active",
+            Number(chip.dataset.minutes) === activeMinutes
+        );
+    });
+
+    // Timer display and ring
+    updateTimerDisplay();
+    updateRingProgress();
+
+    // Reset done banner
+    const banner = document.getElementById("focus-done-banner");
+    if (banner) banner.style.display = "none";
+
+    // Reset pause button label
+    const pauseBtn = document.getElementById("focus-pause-btn");
+    if (pauseBtn) pauseBtn.textContent = "Pause";
+
+    // Build subtask list
+    const detailsEl = document.getElementById("focus-subtasks-details");
+    const listEl    = document.getElementById("focus-subtasks-list");
+    const countEl   = document.getElementById("focus-subtasks-count");
+    listEl.innerHTML = "";
+
+    const subtasks = task.subtasks || [];
+    if (subtasks.length > 0) {
+        const done = subtasks.filter(s => s.completed).length;
+        countEl.textContent = `${done} / ${subtasks.length}`;
+
+        subtasks.forEach(sub => {
+            const label = document.createElement("label");
+            label.className = `focus-subtask-item${sub.completed ? " completed" : ""}`;
+            label.innerHTML = `
+                <input type="checkbox" class="focus-subtask-check"
+                       ${sub.completed ? "checked" : ""}>
+                <span>${sub.title}</span>`;
+            const cb = label.querySelector(".focus-subtask-check");
+            cb.addEventListener("change", () =>
+                handleFocusSubtaskToggle(sub, cb.checked, countEl, label));
+            listEl.appendChild(label);
+        });
+
+        detailsEl.style.display = "block";
+    } else {
+        detailsEl.style.display = "none";
+    }
+}
+
+// ======================================
+// Focus Mode Open / Close
+// ======================================
+
+function openFocusMode(task) {
+    if (!task) return;
+
+    // Stop any previously-running timer before resetting state
+    if (focusState.intervalId) {
+        clearInterval(focusState.intervalId);
+        focusState.intervalId = null;
+    }
+
+    focusState.task         = task;
+    focusState.totalSeconds = effortToSeconds(task.estimatedEffort);
+    focusState.remaining    = focusState.totalSeconds;
+    focusState.running      = false;
+    focusState.startEpoch   = null;
+    focusState.pausedAt     = null;
+
+    populateFocusOverlay(task);
+
+    const overlay = document.getElementById("focus-overlay");
+    if (overlay) overlay.style.display = "flex";
+
+    startTimer();
+}
+
+function closeFocusMode() {
+    clearInterval(focusState.intervalId);
+    focusState.intervalId = null;
+    focusState.running    = false;
+    focusState.task       = null;
+    const overlay = document.getElementById("focus-overlay");
+    if (overlay) overlay.style.display = "none";
+    updateRecommendationUI();
+}
+
+// ======================================
+// Focus Mode Completion
+// ======================================
+
+async function handleFocusComplete() {
+    const task = focusState.task;
+    if (!task) return;
+
+    // Locate the matching task card by title (no data-id on cards)
+    const taskCard = [...document.querySelectorAll(".task-card")]
+        .find(c => {
+            const h3 = c.querySelector("h3");
+            return h3 && h3.textContent.trim() === task.title.trim();
+        }) || null;
+
+    const result = await handleTaskCompletion(task, taskCard, true);
+
+    if (result !== false) {
+        closeFocusMode();
+    } else {
+        console.error("Focus: could not complete task", task);
+    }
+}
+
+// ======================================
+// Focus Subtask Toggle
+// ======================================
+
+async function handleFocusSubtaskToggle(subtask, checked, countEl, labelEl) {
+    const task = focusState.task;
+    const user = auth.currentUser;
+    if (!task || !user) return;
+
+    // Optimistically apply the change
+    const prev        = subtask.completed;
+    subtask.completed = checked;
+
+    // Recompute derived state
+    const allDone = (task.subtasks || []).every(s => s.completed);
+    const done    = (task.subtasks || []).filter(s => s.completed).length;
+
+    // Update count badge
+    countEl.textContent = `${done} / ${task.subtasks.length}`;
+
+    // Update label visual state
+    labelEl.classList.toggle("completed", checked);
+
+    // Sync matching main-list card — find by task title (cards have no data-id)
+    const mainCard = [...document.querySelectorAll(".task-card")]
+        .find(c => {
+            const h3 = c.querySelector("h3");
+            return h3 && h3.textContent.trim() === task.title.trim();
+        });
+
+    if (mainCard) {
+        // Sync the individual subtask checkbox in the main card's subtask list
+        const mainSubtaskLabels = mainCard.querySelectorAll(".task-subtask");
+        mainSubtaskLabels.forEach(lbl => {
+            const titleEl = lbl.querySelector(".subtask-title");
+            if (titleEl && titleEl.textContent.trim() === subtask.title.trim()) {
+                const cb = lbl.querySelector(".subtask-checkbox");
+                if (cb) cb.checked = checked;
+                lbl.classList.toggle("completed", checked);
+            }
+        });
+
+        // Sync main task card checkbox and class to reflect allDone
+        const mainTaskCb = mainCard.querySelector(".task-checkbox");
+        if (mainTaskCb) mainTaskCb.checked = allDone;
+        mainCard.classList.toggle("completed", allDone);
+    }
+
+    try {
+        const taskRef = doc(db, "users", user.uid, "tasks", task.id);
+        await updateDoc(taskRef, {
+            subtasks:  task.subtasks,
+            completed: allDone
+        });
+        task.completed = allDone;
+        updateProgress();
+    } catch (err) {
+        console.error("Focus subtask toggle failed:", err);
+
+        // Revert optimistic changes
+        subtask.completed = prev;
+        const revertDone  = (task.subtasks || []).filter(s => s.completed).length;
+        countEl.textContent = `${revertDone} / ${task.subtasks.length}`;
+        labelEl.classList.toggle("completed", prev);
+
+        const cb = labelEl.querySelector("input[type='checkbox']");
+        if (cb) cb.checked = prev;
+
+        // Revert main card sync
+        if (mainCard) {
+            const mainSubtaskLabels = mainCard.querySelectorAll(".task-subtask");
+            mainSubtaskLabels.forEach(lbl => {
+                const titleEl = lbl.querySelector(".subtask-title");
+                if (titleEl && titleEl.textContent.trim() === subtask.title.trim()) {
+                    const cb = lbl.querySelector(".subtask-checkbox");
+                    if (cb) cb.checked = prev;
+                    lbl.classList.toggle("completed", prev);
+                }
+            });
+        }
+    }
+}
+
+// ======================================
 // Task Collection (for scoring engine)
 // ======================================
 
@@ -355,17 +674,7 @@ function updateRecommendationUI() {
     const freshBtn = recBtn.cloneNode(true);
     recBtn.parentNode.replaceChild(freshBtn, recBtn);
     freshBtn.addEventListener("click", () => {
-        // Scroll the task card into view and highlight it.
-        // Does NOT complete the task — completion stays with the checkbox.
-        const taskCard = [...document.querySelectorAll(".task-card")]
-            .find(card => {
-                const h3 = card.querySelector("h3");
-                return h3 && h3.textContent.trim() === result.task.title.trim();
-            });
-        if (!taskCard) return;
-        taskCard.scrollIntoView({ behavior: "smooth", block: "center" });
-        taskCard.classList.add("task-highlighted");
-        setTimeout(() => taskCard.classList.remove("task-highlighted"), 1800);
+        openFocusMode(result.task);
     });
 
     recCard.style.display  = "flex";
@@ -1391,7 +1700,21 @@ deleteButton.addEventListener(
     }
 );
 
+// ======================================
+// Focus Task
+// ======================================
 
+const focusBtn = document.createElement("button");
+focusBtn.type = "button";
+focusBtn.textContent = "🎯 Focus";
+
+focusBtn.addEventListener("click", () => {
+    taskMenu.classList.remove("show");
+    taskCard.classList.remove("menu-open");
+    openFocusMode(task);
+});
+
+taskMenu.appendChild(focusBtn);
 
 }
 
@@ -2148,3 +2471,48 @@ async function handleTaskCompletion(
     }
 
 }
+
+
+// ======================================
+// Focus Mode — Overlay Event Listeners
+// ======================================
+
+document.getElementById("focus-exit-btn")
+    .addEventListener("click", closeFocusMode);
+
+document.getElementById("focus-complete-btn")
+    .addEventListener("click", handleFocusComplete);
+
+document.getElementById("focus-pause-btn")
+    .addEventListener("click", () => {
+        if (focusState.running) pauseTimer(); else resumeTimer();
+    });
+
+document.querySelectorAll(".focus-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+        const mins = Number(chip.dataset.minutes);
+
+        // Reset timer state to new duration
+        clearInterval(focusState.intervalId);
+        focusState.intervalId   = null;
+        focusState.running      = false;
+        focusState.totalSeconds = mins * 60;
+        focusState.remaining    = focusState.totalSeconds;
+        focusState.pausedAt     = null;
+
+        // Update active chip highlight
+        document.querySelectorAll(".focus-chip").forEach(c =>
+            c.classList.toggle("focus-chip--active", c === chip));
+
+        // Reset done banner and pause button
+        const banner = document.getElementById("focus-done-banner");
+        if (banner) banner.style.display = "none";
+        const pauseBtn = document.getElementById("focus-pause-btn");
+        if (pauseBtn) pauseBtn.textContent = "Pause";
+
+        // Refresh display and start
+        updateTimerDisplay();
+        updateRingProgress();
+        startTimer();
+    });
+});

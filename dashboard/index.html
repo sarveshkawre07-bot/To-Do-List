@@ -581,6 +581,77 @@
 
     <script type="module" src="dashboard.js"></script>
 
+<!-- ============================= -->
+<!-- FOCUS MODE OVERLAY            -->
+<!-- ============================= -->
+
+<div id="focus-overlay" class="focus-overlay" role="dialog"
+     aria-modal="true" aria-labelledby="focus-task-title" style="display:none;">
+
+    <!-- Top-right exit button -->
+    <button id="focus-exit-btn" class="focus-exit-btn" type="button"
+            aria-label="Exit Focus Mode">✕ Exit</button>
+
+    <!-- Central card -->
+    <div class="focus-card">
+
+        <!-- Task metadata badges -->
+        <div class="focus-meta">
+            <span id="focus-category-badge" class="focus-badge focus-badge--category"></span>
+            <span id="focus-priority-badge" class="focus-badge focus-badge--priority"></span>
+            <span id="focus-effort-badge"   class="focus-badge focus-badge--effort"></span>
+        </div>
+
+        <h2 id="focus-task-title" class="focus-task-title"></h2>
+        <p  id="focus-task-due"   class="focus-task-due"   style="display:none;"></p>
+
+        <!-- SVG circular timer -->
+        <div class="focus-timer-ring" role="timer" aria-live="polite"
+             aria-label="Focus timer">
+            <svg viewBox="0 0 120 120" class="focus-ring-svg" aria-hidden="true">
+                <circle class="focus-ring-track" cx="60" cy="60" r="54"/>
+                <circle id="focus-ring-progress" class="focus-ring-progress"
+                        cx="60" cy="60" r="54"/>
+            </svg>
+            <span id="focus-timer-display" class="focus-timer-display">25:00</span>
+        </div>
+
+        <!-- Duration chips -->
+        <div class="focus-duration-chips" role="group" aria-label="Session duration">
+            <button class="focus-chip" data-minutes="15"  type="button">15 min</button>
+            <button class="focus-chip" data-minutes="30"  type="button">30 min</button>
+            <button class="focus-chip" data-minutes="60"  type="button">60 min</button>
+            <button class="focus-chip" data-minutes="120" type="button">120 min</button>
+            <button class="focus-chip" data-minutes="90"  type="button">180+ min</button>
+        </div>
+
+        <!-- Timer expired banner (hidden until 00:00) -->
+        <div id="focus-done-banner" class="focus-done-banner" role="alert"
+             aria-live="assertive" style="display:none;">
+            ⏰ Time's up! Great work.
+        </div>
+
+        <!-- Subtasks (collapsible) -->
+        <details id="focus-subtasks-details" class="focus-subtasks-details"
+                 style="display:none;">
+            <summary class="focus-subtasks-summary">
+                Subtasks <span id="focus-subtasks-count" class="focus-subtasks-count"></span>
+            </summary>
+            <div id="focus-subtasks-list" class="focus-subtasks-list"></div>
+        </details>
+
+        <!-- Bottom controls -->
+        <div class="focus-controls">
+            <button id="focus-pause-btn"    class="focus-btn focus-btn--secondary"
+                    type="button">Pause</button>
+            <button id="focus-complete-btn" class="focus-btn focus-btn--primary"
+                    type="button">Complete Task</button>
+        </div>
+
+    </div>
+
+</div>
+
 </body>
 
 </html>
